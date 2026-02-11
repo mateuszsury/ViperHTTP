@@ -1,0 +1,4 @@
+interface:
+  display_name: "ViperHTTP IPC Runtime"
+  short_description: "IPC runtime: queues, ring buffers, envelopes"
+  default_prompt: "Use $viperhttp-ipc-runtime to design or modify IPC queues, ring buffers, and message envelopes."

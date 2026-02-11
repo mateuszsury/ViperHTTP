@@ -1,0 +1,4 @@
+interface:
+  display_name: "ViperHTTP Build and Bench"
+  short_description: "ESP-IDF build config and benchmarks"
+  default_prompt: "Use $viperhttp-build-bench to update ESP-IDF wiring, sdkconfig, and benchmarks."

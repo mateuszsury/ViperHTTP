@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ title|default:"Template demo"|escape }}</title>
+  </head>
+  <body>
+    <h1>Hello {{ name|default:"world"|escape }}</h1>
+    {% if show_items %}
+    <ul>
+      {% for item in items %}
+      <li data-i="{{ loop.index }}">{{ item|escape }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">No items</p>
+    {% endif %}
+    <p class="raw">{{ raw_html|safe }}</p>
+  </body>
+</html>

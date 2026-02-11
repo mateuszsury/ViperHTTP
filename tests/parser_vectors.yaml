@@ -1,0 +1,121 @@
+meta:
+  format: v1
+  raw_encoding: c-escaped
+  notes:
+    - raw strings use literal \r\n sequences; harness must unescape
+    - expect.result uses OK/INCOMPLETE/INVALID/TOO_LARGE/UNSUPPORTED
+cases:
+  - name: get_root
+    raw: 'GET / HTTP/1.1\r\nHost: example.com\r\n\r\n'
+    expect:
+      result: OK
+      method: 'GET'
+      uri: '/'
+      path: '/'
+      query: ''
+      headers:
+        - name: 'Host'
+          value: 'example.com'
+      query_params: []
+      content_length: 0
+      is_chunked: 0
+      is_websocket: 0
+      body: ''
+  - name: get_query_params
+    raw: 'GET /search?q=esp32&lang=en&flag&empty= HTTP/1.1\r\nHost: example.com\r\n\r\n'
+    expect:
+      result: OK
+      method: 'GET'
+      uri: '/search?q=esp32&lang=en&flag&empty='
+      path: '/search'
+      query: 'q=esp32&lang=en&flag&empty='
+      headers:
+        - name: 'Host'
+          value: 'example.com'
+      query_params:
+        - key: 'q'
+          value: 'esp32'
+          has_value: 1
+        - key: 'lang'
+          value: 'en'
+          has_value: 1
+        - key: 'flag'
+          value: ''
+          has_value: 0
+        - key: 'empty'
+          value: ''
+          has_value: 1
+      content_length: 0
+      is_chunked: 0
+      is_websocket: 0
+      body: ''
+  - name: post_with_body
+    raw: 'POST /api/items HTTP/1.1\r\nHost: example.com\r\nContent-Length: 11\r\n\r\nhello=world'
+    expect:
+      result: OK
+      method: 'POST'
+      uri: '/api/items'
+      path: '/api/items'
+      query: ''
+      headers:
+        - name: 'Host'
+          value: 'example.com'
+        - name: 'Content-Length'
+          value: '11'
+      query_params: []
+      content_length: 11
+      is_chunked: 0
+      is_websocket: 0
+      body: 'hello=world'
+  - name: websocket_upgrade
+    raw: 'GET /ws HTTP/1.1\r\nHost: example.com\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\n\r\n'
+    expect:
+      result: OK
+      method: 'GET'
+      uri: '/ws'
+      path: '/ws'
+      query: ''
+      headers:
+        - name: 'Host'
+          value: 'example.com'
+        - name: 'Upgrade'
+          value: 'WebSocket'
+        - name: 'Connection'
+          value: 'Upgrade'
+      query_params: []
+      content_length: 0
+      is_chunked: 0
+      is_websocket: 1
+      body: ''
+  - name: chunked_unsupported
+    raw: 'POST /upload HTTP/1.1\r\nHost: example.com\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n'
+    expect:
+      result: UNSUPPORTED
+  - name: invalid_request_line
+    raw: 'GET /missing-version\r\nHost: example.com\r\n\r\n'
+    expect:
+      result: INVALID
+  - name: incomplete_headers
+    raw: 'GET / HTTP/1.1\r\nHost: example.com\r\n'
+    expect:
+      result: INCOMPLETE
+  - name: body_incomplete
+    raw: 'POST /submit HTTP/1.1\r\nHost: example.com\r\nContent-Length: 5\r\n\r\nabc'
+    expect:
+      result: INCOMPLETE
+  - name: too_many_headers
+    raw: 'GET / HTTP/1.1\r\nH01: v\r\nH02: v\r\nH03: v\r\nH04: v\r\nH05: v\r\nH06: v\r\nH07: v\r\nH08: v\r\nH09: v\r\nH10: v\r\nH11: v\r\nH12: v\r\nH13: v\r\nH14: v\r\nH15: v\r\nH16: v\r\nH17: v\r\nH18: v\r\nH19: v\r\nH20: v\r\nH21: v\r\nH22: v\r\nH23: v\r\nH24: v\r\nH25: v\r\n\r\n'
+    expect:
+      result: TOO_LARGE
+  - name: too_many_query_params
+    raw: 'GET /search?p1=v1&p2=v2&p3=v3&p4=v4&p5=v5&p6=v6&p7=v7&p8=v8&p9=v9&p10=v10&p11=v11&p12=v12&p13=v13&p14=v14&p15=v15&p16=v16&p17=v17 HTTP/1.1\r\nHost: example.com\r\n\r\n'
+    expect:
+      result: TOO_LARGE
+  - name: uri_too_long
+    raw: 'GET /aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa HTTP/1.1\r\nHost: example.com\r\n\r\n'
+    expect:
+      result: TOO_LARGE
+  - name: content_length_too_large
+    raw: 'POST /big HTTP/1.1\r\nHost: example.com\r\nContent-Length: 70000\r\n\r\n'
+    expect:
+      result: TOO_LARGE

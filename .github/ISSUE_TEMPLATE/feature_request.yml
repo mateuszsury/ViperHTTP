@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose a new capability or API improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user problem are you solving?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe behavior, API shape, and defaults.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What options were evaluated?
+
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and migration impact
+      description: Any breaking changes or upgrade notes?
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Which host/device tests should prove this feature?

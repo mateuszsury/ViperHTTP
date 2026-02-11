@@ -1,0 +1,2947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veilcord — Private by Design. Encrypted by Default.</title>
+<meta name="description" content="Secure peer-to-peer encrypted messenger with Signal Protocol, WebRTC voice/video calls, and zero-knowledge architecture.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@200;300;400;500;600;700;800;900&family=Sora:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ========== CSS VARIABLES ========== */
+:root {
+  --bg-void: #050508;
+  --bg-deep: #0a0a10;
+  --bg-card: #0e0e18;
+  --bg-card-hover: #12121f;
+  --bg-elevated: #161625;
+  --border-subtle: rgba(255,255,255,0.04);
+  --border-medium: rgba(255,255,255,0.08);
+  --border-glow: rgba(180,30,30,0.3);
+  --red-primary: #c41a1a;
+  --red-bright: #e82828;
+  --red-glow: #ff3333;
+  --red-dark: #6b0f0f;
+  --red-subtle: rgba(196,26,26,0.1);
+  --red-gradient: linear-gradient(135deg, #c41a1a, #e82828, #ff4444);
+  --text-primary: #e8e6f0;
+  --text-secondary: #9896a8;
+  --text-muted: #5c5a6e;
+  --text-accent: #f0c0c0;
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Sora', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red-dark) var(--bg-void);
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-void); }
+::-webkit-scrollbar-thumb { background: var(--red-dark); border-radius: 3px; }
+
+::selection { background: var(--red-primary); color: #fff; }
+
+a { color: var(--red-bright); text-decoration: none; transition: all 0.3s; }
+a:hover { color: var(--red-glow); text-shadow: 0 0 20px rgba(232,40,40,0.4); }
+
+img { max-width: 100%; display: block; }
+
+/* ========== NOISE OVERLAY ========== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* ========== ANIMATED GRID BACKGROUND ========== */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(196,26,26,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,26,26,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  animation: gridShift 30s linear infinite;
+}
+
+@keyframes gridShift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(80px, 80px); }
+}
+
+/* ========== CUSTOM CURSOR ========== */
+.cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--red-bright);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.15s var(--ease-spring);
+  mix-blend-mode: screen;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(232,40,40,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transition: all 0.25s var(--ease-out-expo);
+}
+
+.cursor-ring.hover {
+  width: 56px;
+  height: 56px;
+  border-color: var(--red-bright);
+  background: rgba(232,40,40,0.05);
+}
+
+/* ========== SCROLL REVEAL ========== */
+.reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.9s var(--ease-out-expo);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* ========== NAVIGATION ========== */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 0 48px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(5,5,8,0.7);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: all 0.4s;
+}
+
+nav.scrolled {
+  background: rgba(5,5,8,0.92);
+  border-bottom-color: var(--border-medium);
+  box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.nav-logo .logo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--red-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  box-shadow: 0 0 20px rgba(196,26,26,0.3);
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  position: relative;
+  padding: 4px 0;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--red-gradient);
+  transition: width 0.3s var(--ease-out-expo);
+}
+
+.nav-links a:hover {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+.nav-links a:hover::after { width: 100%; }
+
+.nav-cta {
+  padding: 10px 26px !important;
+  background: var(--red-gradient) !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  transition: all 0.3s !important;
+  box-shadow: 0 4px 20px rgba(196,26,26,0.25);
+}
+
+.nav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(232,40,40,0.4) !important;
+}
+
+.nav-cta::after { display: none !important; }
+
+.mobile-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.mobile-toggle span {
+  width: 24px;
+  height: 2px;
+  background: var(--text-primary);
+  transition: all 0.3s;
+}
+
+/* ========== HERO SECTION ========== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 120px 48px 80px;
+}
+
+.hero-radial {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,26,26,0.08), transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: heroPulse 8s ease-in-out infinite;
+}
+
+@keyframes heroPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: orbFloat 12s ease-in-out infinite;
+}
+
+.hero-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: rgba(196,26,26,0.06);
+  top: 10%;
+  right: 15%;
+  animation-delay: 0s;
+}
+
+.hero-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: rgba(120,20,20,0.08);
+  bottom: 20%;
+  left: 10%;
+  animation-delay: -4s;
+}
+
+.hero-orb-3 {
+  width: 200px;
+  height: 200px;
+  background: rgba(255,51,51,0.04);
+  top: 30%;
+  left: 25%;
+  animation-delay: -8s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(30px, -20px); }
+  66% { transform: translate(-20px, 30px); }
+}
+
+.hero-content {
+  text-align: center;
+  max-width: 900px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 100px;
+  border: 1px solid var(--border-glow);
+  background: rgba(196,26,26,0.06);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--red-bright);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+
+.hero-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red-bright);
+  box-shadow: 0 0 10px var(--red-bright);
+  animation: dotBlink 2s ease-in-out infinite;
+}
+
+@keyframes dotBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196,26,26,0.1); }
+  50% { box-shadow: 0 0 30px 5px rgba(196,26,26,0.08); }
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, #ffffff 0%, #e0dde8 40%, #c41a1a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero h1 .accent {
+  background: var(--red-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.hero h1 .accent::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--red-gradient);
+  border-radius: 2px;
+  opacity: 0.4;
+}
+
+.hero-sub {
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin: 0 auto 48px;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 64px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border: none;
+  transition: all 0.35s var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--red-gradient);
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(196,26,26,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(232,40,40,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.btn-primary:hover::before { opacity: 1; }
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(196,26,26,0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  color: var(--text-primary);
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+  padding-top: 48px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat .number {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--red-bright);
+  letter-spacing: -0.02em;
+}
+
+.hero-stat .label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* ========== SECTION COMMON ========== */
+section {
+  padding: 120px 48px;
+  position: relative;
+}
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--red-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 16px;
+}
+
+.section-label::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--red-primary);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+/* ========== DIVIDER ========== */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-medium), var(--red-dark), var(--border-medium), transparent);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ========== ABOUT / WHY VEILCORD ========== */
+#about {
+  background: linear-gradient(180deg, var(--bg-void), var(--bg-deep));
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  margin-top: 64px;
+}
+
+.about-visual {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-visual .shield {
+  width: 280px;
+  height: 280px;
+  position: relative;
+}
+
+.shield-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid;
+  animation: shieldRotate linear infinite;
+}
+
+.shield-ring-1 {
+  inset: 0;
+  border-color: rgba(196,26,26,0.2);
+  animation-duration: 20s;
+}
+
+.shield-ring-2 {
+  inset: 20px;
+  border-color: rgba(196,26,26,0.15);
+  animation-duration: 15s;
+  animation-direction: reverse;
+}
+
+.shield-ring-3 {
+  inset: 40px;
+  border-color: rgba(196,26,26,0.1);
+  animation-duration: 25s;
+}
+
+@keyframes shieldRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.shield-ring::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--red-bright);
+  border-radius: 50%;
+  top: -4px;
+  left: 50%;
+  box-shadow: 0 0 12px var(--red-bright);
+}
+
+.shield-core {
+  position: absolute;
+  inset: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,26,26,0.12), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  animation: corePulse 4s ease-in-out infinite;
+}
+
+@keyframes corePulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(196,26,26,0.1); }
+  50% { box-shadow: 0 0 80px rgba(196,26,26,0.2); }
+}
+
+.about-text h3 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+.about-text p {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.85;
+}
+
+.about-text p strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ========== FEATURES GRID ========== */
+#features {
+  background: var(--bg-deep);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 36px 32px;
+  transition: all 0.4s var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--red-gradient);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.feature-card:hover {
+  border-color: rgba(196,26,26,0.2);
+  background: var(--bg-card-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(196,26,26,0.05);
+}
+
+.feature-card:hover::before { opacity: 1; }
+
+.feature-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--red-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  border: 1px solid rgba(196,26,26,0.15);
+}
+
+.feature-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+/* ========== LARGE FEATURE HIGHLIGHT ========== */
+.feature-highlight {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  margin-top: 100px;
+  padding: 80px 0;
+}
+
+.feature-highlight.reverse { direction: rtl; }
+.feature-highlight.reverse > * { direction: ltr; }
+
+.fh-visual {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fh-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(196,26,26,0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.code-block {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.code-block .keyword { color: var(--red-bright); }
+.code-block .string { color: #6dbf8b; }
+.code-block .comment { color: var(--text-muted); font-style: italic; }
+.code-block .func { color: #d4a0ff; }
+.code-block .type { color: #6bb3ff; }
+.code-block .number { color: #ffb86c; }
+
+.fh-text h3 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+}
+
+.fh-text p {
+  color: var(--text-secondary);
+  line-height: 1.85;
+  margin-bottom: 16px;
+}
+
+.fh-text ul {
+  list-style: none;
+  margin-top: 24px;
+}
+
+.fh-text ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.fh-text ul li::before {
+  content: '▸';
+  color: var(--red-bright);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ========== ARCHITECTURE SECTION ========== */
+#architecture {
+  background: linear-gradient(180deg, var(--bg-deep), var(--bg-void));
+}
+
+.arch-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 64px;
+  flex-wrap: wrap;
+}
+
+.arch-node {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  width: 200px;
+  transition: all 0.4s;
+  position: relative;
+}
+
+.arch-node:hover {
+  border-color: rgba(196,26,26,0.3);
+  box-shadow: 0 0 40px rgba(196,26,26,0.08);
+  transform: translateY(-4px);
+}
+
+.arch-node .icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.arch-node h4 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.arch-node p {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.arch-arrow {
+  color: var(--red-dark);
+  font-size: 1.5rem;
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(4px); }
+}
+
+.arch-detail {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 80px;
+}
+
+.arch-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+}
+
+.arch-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(196,26,26,0.04), transparent);
+  pointer-events: none;
+}
+
+.arch-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.arch-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* ========== ENCRYPTION DEEP DIVE ========== */
+#encryption {
+  background: var(--bg-void);
+}
+
+.encryption-layers {
+  margin-top: 64px;
+  position: relative;
+}
+
+.enc-layer {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 32px;
+  padding: 40px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  align-items: start;
+  position: relative;
+}
+
+.enc-layer:last-child { border-bottom: none; }
+
+.enc-num {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--red-dark);
+  line-height: 1;
+}
+
+.enc-content h4 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.enc-content p {
+  color: var(--text-secondary);
+  line-height: 1.85;
+  margin-bottom: 12px;
+}
+
+.enc-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: var(--red-subtle);
+  color: var(--red-bright);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(196,26,26,0.15);
+}
+
+/* ========== COMMUNICATION FEATURES ========== */
+#communication {
+  background: linear-gradient(180deg, var(--bg-void), var(--bg-deep));
+}
+
+.comm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.comm-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 40px 36px;
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.comm-card:hover {
+  border-color: rgba(196,26,26,0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+
+.comm-card .emoji {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.comm-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.comm-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* ========== AUDIO/VIDEO EFFECTS ========== */
+#effects {
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+
+.effects-showcase {
+  margin-top: 64px;
+}
+
+.effect-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  animation: effectScroll 40s linear infinite;
+}
+
+.effect-row:nth-child(2) { animation-direction: reverse; animation-duration: 35s; }
+
+@keyframes effectScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.effect-pill {
+  padding: 14px 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 100px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.effect-pill:hover {
+  border-color: rgba(196,26,26,0.3);
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.effect-pill .emoji { font-size: 1.1rem; }
+
+.effects-detail {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.effect-detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: all 0.4s;
+}
+
+.effect-detail-card:hover {
+  border-color: rgba(196,26,26,0.2);
+  transform: translateY(-3px);
+}
+
+.effect-detail-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.effect-detail-card p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.75;
+}
+
+/* ========== PRIVACY MANIFESTO ========== */
+#privacy {
+  background: var(--bg-void);
+  position: relative;
+}
+
+.privacy-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(196,26,26,0.04), transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(107,15,15,0.06), transparent 50%);
+  pointer-events: none;
+}
+
+.manifesto {
+  max-width: 800px;
+  margin: 64px auto 0;
+  position: relative;
+}
+
+.manifesto-block {
+  padding: 40px 0;
+  border-left: 2px solid var(--border-subtle);
+  padding-left: 40px;
+  position: relative;
+  transition: border-color 0.4s;
+}
+
+.manifesto-block:hover {
+  border-left-color: var(--red-primary);
+}
+
+.manifesto-block::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 48px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-void);
+  border: 2px solid var(--red-dark);
+  transition: all 0.3s;
+}
+
+.manifesto-block:hover::before {
+  background: var(--red-bright);
+  border-color: var(--red-bright);
+  box-shadow: 0 0 16px rgba(232,40,40,0.4);
+}
+
+.manifesto-block h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.manifesto-block p {
+  color: var(--text-secondary);
+  line-height: 1.9;
+  margin-bottom: 12px;
+}
+
+/* ========== COMPARISON TABLE ========== */
+#comparison {
+  background: linear-gradient(180deg, var(--bg-void), var(--bg-deep));
+}
+
+.comparison-table {
+  margin-top: 64px;
+  overflow-x: auto;
+}
+
+.comparison-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.88rem;
+}
+
+.comparison-table thead th {
+  padding: 20px 24px;
+  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-medium);
+  white-space: nowrap;
+}
+
+.comparison-table thead th:first-child {
+  border-radius: 12px 0 0 0;
+}
+
+.comparison-table thead th:last-child {
+  border-radius: 0 12px 0 0;
+}
+
+.comparison-table thead th.highlight {
+  background: rgba(196,26,26,0.08);
+  color: var(--red-bright);
+  border-bottom-color: rgba(196,26,26,0.2);
+}
+
+.comparison-table tbody td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.comparison-table tbody td:first-child {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.comparison-table tbody td.highlight {
+  background: rgba(196,26,26,0.04);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.comparison-table tbody tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+.comparison-table tbody tr:hover td.highlight {
+  background: rgba(196,26,26,0.08);
+}
+
+.check { color: #4ade80; }
+.cross { color: #666; }
+
+/* ========== TECH STACK ========== */
+#tech {
+  background: var(--bg-deep);
+}
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 64px;
+}
+
+.tech-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 28px 24px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.tech-item:hover {
+  border-color: rgba(196,26,26,0.2);
+  transform: translateY(-3px);
+}
+
+.tech-item .icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.tech-item h4 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.tech-item p {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* ========== QUICK START ========== */
+#quickstart {
+  background: linear-gradient(180deg, var(--bg-deep), var(--bg-void));
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 64px;
+}
+
+.step {
+  position: relative;
+  padding: 40px 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  transition: all 0.4s;
+}
+
+.step:hover {
+  border-color: rgba(196,26,26,0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.step-num {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 800;
+  color: rgba(196,26,26,0.1);
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  line-height: 1;
+}
+
+.step h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.step p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.step code {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: var(--bg-void);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--red-bright);
+}
+
+/* ========== FAQ ========== */
+#faq {
+  background: var(--bg-void);
+}
+
+.faq-list {
+  max-width: 800px;
+  margin: 64px auto 0;
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: color 0.3s;
+  user-select: none;
+}
+
+.faq-question:hover { color: var(--red-bright); }
+
+.faq-toggle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.faq-item.open .faq-toggle {
+  background: var(--red-primary);
+  border-color: var(--red-primary);
+  color: #fff;
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s var(--ease-out-expo), padding 0.3s;
+}
+
+.faq-item.open .faq-answer {
+  max-height: 400px;
+  padding-bottom: 24px;
+}
+
+.faq-answer p {
+  color: var(--text-secondary);
+  line-height: 1.85;
+  font-size: 0.92rem;
+}
+
+/* ========== CTA SECTION ========== */
+#cta {
+  background: var(--bg-void);
+  text-align: center;
+  padding: 160px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,26,26,0.1), transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: heroPulse 6s ease-in-out infinite;
+}
+
+#cta .section-title {
+  position: relative;
+  z-index: 2;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+}
+
+#cta .section-desc {
+  margin: 0 auto 48px;
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+}
+
+#cta .hero-actions {
+  position: relative;
+  z-index: 2;
+}
+
+/* ========== FOOTER ========== */
+footer {
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border-subtle);
+  padding: 80px 48px 40px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin-top: 16px;
+  max-width: 300px;
+}
+
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.footer-col ul { list-style: none; }
+
+.footer-col ul li { margin-bottom: 10px; }
+
+.footer-col ul a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  transition: color 0.3s;
+}
+
+.footer-col ul a:hover {
+  color: var(--red-bright);
+  text-shadow: none;
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 48px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.footer-social {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-social a {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  color: var(--text-muted);
+}
+
+.footer-social a:hover {
+  border-color: rgba(196,26,26,0.3);
+  color: var(--red-bright);
+  transform: translateY(-2px);
+  text-shadow: none;
+}
+
+/* ========== FLOATING PARTICLES ========== */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(196,26,26,0.3);
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .features-grid,
+  .effects-detail { grid-template-columns: repeat(2, 1fr); }
+  .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  .about-grid,
+  .feature-highlight { grid-template-columns: 1fr; gap: 48px; }
+  .feature-highlight.reverse { direction: ltr; }
+  .arch-detail { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .mobile-toggle { display: flex; }
+  section, .hero { padding: 80px 24px; }
+  .features-grid,
+  .comm-grid,
+  .steps,
+  .effects-detail { grid-template-columns: 1fr; }
+  .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-stats { flex-direction: column; gap: 24px; }
+  .arch-flow { flex-direction: column; }
+  .arch-arrow { transform: rotate(90deg); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+  .hero-stat .number { font-size: 1.8rem; }
+  .cursor-dot, .cursor-ring { display: none; }
+}
+
+@media (max-width: 480px) {
+  .tech-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+}
+
+/* ========== TYPING ANIMATION ========== */
+.typed-text::after {
+  content: '|';
+  color: var(--red-bright);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ========== GLITCH EFFECT ========== */
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-void);
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -2px 0 var(--red-bright);
+  clip-path: inset(0 100% 0 0);
+  animation: glitch1 4s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: 2px 0 rgba(100,100,255,0.5);
+  clip-path: inset(0 0 0 100%);
+  animation: glitch2 4s infinite linear alternate-reverse;
+}
+
+@keyframes glitch1 {
+  0% { clip-path: inset(0 100% 0 0); }
+  5% { clip-path: inset(20% 0 60% 0); }
+  6% { clip-path: inset(0 100% 0 0); }
+  40% { clip-path: inset(0 100% 0 0); }
+  42% { clip-path: inset(50% 0 20% 0); }
+  43% { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 100% 0 0); }
+}
+
+@keyframes glitch2 {
+  0% { clip-path: inset(0 0 0 100%); }
+  15% { clip-path: inset(40% 0 40% 0); }
+  16% { clip-path: inset(0 0 0 100%); }
+  60% { clip-path: inset(0 0 0 100%); }
+  62% { clip-path: inset(10% 0 70% 0); }
+  63% { clip-path: inset(0 0 0 100%); }
+  100% { clip-path: inset(0 0 0 100%); }
+}
+
+/* ========== MARQUEE ========== */
+.marquee-section {
+  overflow: hidden;
+  padding: 32px 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 48px;
+  animation: marquee 25s linear infinite;
+  width: max-content;
+}
+
+.marquee-track span {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.marquee-track span .sep {
+  color: var(--red-dark);
+  font-size: 0.6rem;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Effects -->
+<div class="grid-bg"></div>
+<div class="particles" id="particles"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ========== NAVIGATION ========== -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">V</div>
+    Veilcord
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#encryption">Encryption</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+    <li><a href="#comparison">Compare</a></li>
+    <li><a href="https://github.com/mateuszsury/veilcord" target="_blank" class="nav-cta">GitHub ↗</a></li>
+  </ul>
+  <div class="mobile-toggle" id="mobileToggle">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="hero" id="hero">
+  <div class="hero-radial"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <div class="hero-content">
+    <div class="hero-badge reveal">
+      <span class="dot"></span>
+      Signal Protocol · Zero-Knowledge · P2P
+    </div>
+    <h1 class="reveal reveal-delay-1 glitch" data-text="Private by Design. Encrypted by Default.">
+      Private by Design.<br><span class="accent">Encrypted by Default.</span>
+    </h1>
+    <p class="hero-sub reveal reveal-delay-2">
+      Veilcord is a next-generation peer-to-peer encrypted messenger built for the privacy-conscious.
+      No corporate servers. No data harvesting. No compromises. Your conversations belong to you — and only you.
+    </p>
+    <div class="hero-actions reveal reveal-delay-3">
+      <a href="https://github.com/mateuszsury/veilcord/releases" target="_blank" class="btn btn-primary">
+        ⬇ Download for Windows
+      </a>
+      <a href="https://github.com/mateuszsury/veilcord" target="_blank" class="btn btn-secondary">
+        ⭐ View on GitHub
+      </a>
+    </div>
+    <div class="hero-stats reveal reveal-delay-4">
+      <div class="hero-stat">
+        <div class="number" data-count="256">256</div>
+        <div class="label">Bit AES Encryption</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">P2P</div>
+        <div class="label">Direct Connection</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">0</div>
+        <div class="label">Data Stored on Servers</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">100%</div>
+        <div class="label">Open Source</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== MARQUEE ========== -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span>Signal Protocol <span class="sep">◆</span></span>
+    <span>End-to-End Encryption <span class="sep">◆</span></span>
+    <span>Double Ratchet <span class="sep">◆</span></span>
+    <span>X3DH Key Agreement <span class="sep">◆</span></span>
+    <span>SQLCipher Storage <span class="sep">◆</span></span>
+    <span>DPAPI Key Protection <span class="sep">◆</span></span>
+    <span>WebRTC Calls <span class="sep">◆</span></span>
+    <span>Zero-Knowledge <span class="sep">◆</span></span>
+    <span>Perfect Forward Secrecy <span class="sep">◆</span></span>
+    <span>Sender Keys <span class="sep">◆</span></span>
+    <span>Ed25519 Identity <span class="sep">◆</span></span>
+    <span>Peer-to-Peer <span class="sep">◆</span></span>
+    <!-- Duplicate for seamless loop -->
+    <span>Signal Protocol <span class="sep">◆</span></span>
+    <span>End-to-End Encryption <span class="sep">◆</span></span>
+    <span>Double Ratchet <span class="sep">◆</span></span>
+    <span>X3DH Key Agreement <span class="sep">◆</span></span>
+    <span>SQLCipher Storage <span class="sep">◆</span></span>
+    <span>DPAPI Key Protection <span class="sep">◆</span></span>
+    <span>WebRTC Calls <span class="sep">◆</span></span>
+    <span>Zero-Knowledge <span class="sep">◆</span></span>
+    <span>Perfect Forward Secrecy <span class="sep">◆</span></span>
+    <span>Sender Keys <span class="sep">◆</span></span>
+    <span>Ed25519 Identity <span class="sep">◆</span></span>
+    <span>Peer-to-Peer <span class="sep">◆</span></span>
+  </div>
+</div>
+
+<!-- ========== ABOUT ========== -->
+<section id="about">
+  <div class="section-container">
+    <div class="section-label reveal">What is Veilcord</div>
+    <h2 class="section-title reveal reveal-delay-1">Communication Without<br>Surveillance</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      In a world where every message is monetized, analyzed, and stored indefinitely by corporate entities,
+      Veilcord returns control of communication back to where it belongs — in your hands.
+    </p>
+
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="shield">
+          <div class="shield-ring shield-ring-1"></div>
+          <div class="shield-ring shield-ring-2"></div>
+          <div class="shield-ring shield-ring-3"></div>
+          <div class="shield-core">🛡️</div>
+        </div>
+      </div>
+      <div class="about-text reveal reveal-delay-2">
+        <h3>Why We Built Veilcord</h3>
+        <p>
+          Traditional messaging applications are built around a fundamental flaw: <strong>a central server that sees everything</strong>.
+          Every message, every file, every call metadata passes through infrastructure controlled by a corporation whose primary business model
+          is the harvesting and monetization of user data. Even services claiming end-to-end encryption often retain metadata — who you talk to,
+          when you talk, how often, and from where.
+        </p>
+        <p>
+          Veilcord was created to fundamentally rethink this model. By combining the <strong>Signal Protocol's industry-leading encryption</strong>
+          with a <strong>true peer-to-peer architecture</strong>, we have built a messaging platform where the infrastructure itself cannot
+          be weaponized against users. There are no message databases to subpoena, no metadata logs to analyze, and no corporate entity
+          with the capability to read your conversations.
+        </p>
+        <p>
+          The signaling server exists only to facilitate initial peer discovery — once two users establish a direct connection, all communication
+          flows entirely between their devices. Your encryption keys are generated on your device, stored on your device, and <strong>never
+          transmitted to any server</strong>. This is zero-knowledge architecture in its purest form.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== FEATURES ========== -->
+<section id="features">
+  <div class="section-container">
+    <div class="section-label reveal">Core Features</div>
+    <h2 class="section-title reveal reveal-delay-1">Everything You Need.<br>Nothing You Don't.</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Veilcord delivers a full-featured communication suite without compromising on privacy.
+      Every capability is built with encryption-first principles at its core.
+    </p>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon">🔐</div>
+        <h3>Signal Protocol E2EE</h3>
+        <p>Industry-standard end-to-end encryption powered by the Signal Protocol. Every message, file, and call is protected with the same encryption trusted by journalists, activists, and security professionals worldwide. The Double Ratchet algorithm ensures that even if a single key is compromised, past and future messages remain secure.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">🌐</div>
+        <h3>Peer-to-Peer Architecture</h3>
+        <p>Messages travel directly between users via encrypted P2P channels. No corporate intermediary ever has access to your communication. The signaling server is used exclusively for initial connection establishment — after that, your data flows directly between devices with no middleman involved.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">🧠</div>
+        <h3>Zero-Knowledge Design</h3>
+        <p>Your encryption keys are generated locally using cryptographically secure random number generation and never leave your device. The server infrastructure has no technical capability to decrypt any user communication. Even under legal compulsion, there is nothing to hand over — the architecture guarantees it.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon">📞</div>
+        <h3>WebRTC Voice & Video</h3>
+        <p>Crystal-clear voice and video calls powered by WebRTC with end-to-end encryption. Support for 1-on-1 and group calls with mesh topology, screen sharing, and adaptive bitrate that automatically adjusts quality based on your network conditions. Opus codec ensures studio-quality audio even on limited bandwidth.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-4">
+        <div class="feature-icon">💾</div>
+        <h3>Encrypted Local Storage</h3>
+        <p>All local data is stored in a SQLCipher-encrypted database protected with AES-256 encryption. Database encryption keys are secured via Windows DPAPI, meaning no master password is required while maintaining military-grade protection. Your chat history is yours alone — completely inaccessible to anyone without physical access to your device.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-5">
+        <div class="feature-icon">📁</div>
+        <h3>Encrypted File Transfer</h3>
+        <p>Send images, videos, documents, audio files, and voice messages through encrypted P2P channels. Files are encrypted before transmission and decrypted only on the recipient's device. No file ever touches a third-party server, ensuring your shared content remains completely private and uncompromised.</p>
+      </div>
+    </div>
+
+    <!-- Feature Highlight: Signal Protocol -->
+    <div class="feature-highlight reveal">
+      <div class="fh-visual">
+        <div class="code-block">
+          <span class="comment">// X3DH Key Agreement Protocol</span><br>
+          <span class="keyword">async</span> <span class="func">performX3DH</span>(identity, prekey) {<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> ek = <span class="keyword">await</span> <span class="func">generateEphemeral</span>();<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> dh1 = <span class="func">x25519</span>(ik, spk);<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> dh2 = <span class="func">x25519</span>(ek, ik_remote);<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> dh3 = <span class="func">x25519</span>(ek, spk);<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> dh4 = <span class="func">x25519</span>(ek, opk);<br>
+          &nbsp;&nbsp;<span class="keyword">return</span> <span class="func">HKDF</span>(<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;dh1 || dh2 || dh3 || dh4,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"VeilcordSession"</span><br>
+          &nbsp;&nbsp;);<br>
+          }<br><br>
+          <span class="comment">// Double Ratchet: self-healing encryption</span><br>
+          <span class="keyword">async</span> <span class="func">ratchetStep</span>(header, ciphertext) {<br>
+          &nbsp;&nbsp;<span class="keyword">if</span> (header.dh !== <span class="keyword">this</span>.remoteDH) {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="func">dhRatchet</span>(header);<br>
+          &nbsp;&nbsp;}<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> mk = <span class="func">chainRatchet</span>();<br>
+          &nbsp;&nbsp;<span class="keyword">return</span> <span class="func">decrypt</span>(mk, ciphertext);<br>
+          }
+        </div>
+      </div>
+      <div class="fh-text">
+        <h3>Signal Protocol: The Gold Standard of Encryption</h3>
+        <p>
+          Veilcord implements the complete Signal Protocol stack — the same cryptographic framework that secures billions of messages daily
+          across the world's most trusted communication platforms. But unlike those platforms, Veilcord pairs this encryption with a true
+          peer-to-peer architecture, eliminating the single point of trust that centralized services represent.
+        </p>
+        <p>
+          The protocol combines Extended Triple Diffie-Hellman (X3DH) key agreement with the Double Ratchet algorithm to provide
+          perfect forward secrecy and future secrecy. This means that even if an attacker somehow obtains your current encryption keys,
+          they cannot decrypt past conversations, and the system automatically heals itself by generating fresh keys for future messages.
+        </p>
+        <ul>
+          <li>X3DH key agreement with Ed25519 identity keys and X25519 ephemeral keys</li>
+          <li>Double Ratchet with automatic key rotation on every message exchange</li>
+          <li>AES-256-GCM authenticated encryption for message payloads</li>
+          <li>HMAC-SHA256 for message authentication codes</li>
+          <li>Sender Keys protocol for efficient encrypted group messaging</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Feature Highlight: P2P -->
+    <div class="feature-highlight reverse reveal">
+      <div class="fh-visual">
+        <div class="code-block">
+          <span class="comment">// Peer-to-Peer Connection via WebRTC</span><br>
+          <span class="keyword">const</span> peer = <span class="keyword">new</span> <span class="type">RTCPeerConnection</span>({<br>
+          &nbsp;&nbsp;iceServers: [<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;{ urls: <span class="string">"stun:stun.veilcord.net"</span> },<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;{ urls: <span class="string">"turn:turn.veilcord.net"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;credential: <span class="func">generateEphemeral</span>() }<br>
+          &nbsp;&nbsp;]<br>
+          });<br><br>
+          <span class="comment">// Encrypted data channel</span><br>
+          <span class="keyword">const</span> channel = peer.<span class="func">createDataChannel</span>(<br>
+          &nbsp;&nbsp;<span class="string">"veilcord-secure"</span>, {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;ordered: <span class="keyword">true</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;maxRetransmits: <span class="number">3</span><br>
+          });<br><br>
+          <span class="comment">// All payloads are E2E encrypted</span><br>
+          <span class="comment">// before entering the data channel</span><br>
+          channel.<span class="func">send</span>(<br>
+          &nbsp;&nbsp;<span class="func">signalEncrypt</span>(message, sessionKey)<br>
+          );
+        </div>
+      </div>
+      <div class="fh-text">
+        <h3>True Peer-to-Peer: No Server in the Middle</h3>
+        <p>
+          Unlike conventional messaging applications that route every message through corporate infrastructure, Veilcord establishes
+          direct WebRTC connections between communicating peers. Once a connection is established, the signaling server plays no further
+          role in the conversation — all data flows directly between the two endpoints.
+        </p>
+        <p>
+          This architecture provides a critical privacy advantage: there is no central point where messages can be intercepted, logged,
+          or analyzed. Even if the signaling server were compromised, an attacker would only see encrypted connection metadata — never the
+          content of any conversation. The WebRTC data channels themselves carry payloads that are already encrypted with the Signal Protocol
+          before transmission, providing defense-in-depth against any network-level adversary.
+        </p>
+        <ul>
+          <li>Direct WebRTC connections — messages never touch a server after handshake</li>
+          <li>STUN/TURN servers for NAT traversal with ephemeral credentials</li>
+          <li>ICE candidate negotiation via encrypted signaling channel</li>
+          <li>Automatic reconnection with session key persistence</li>
+          <li>Mesh topology for group calls — each participant connects directly to every other</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== ARCHITECTURE ========== -->
+<section id="architecture">
+  <div class="section-container">
+    <div class="section-label reveal">System Architecture</div>
+    <h2 class="section-title reveal reveal-delay-1">Built for Resilience.<br>Designed for Trust.</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Every component in Veilcord's architecture was selected and configured with a single overriding principle:
+      minimize trust requirements and maximize user sovereignty over their own data.
+    </p>
+
+    <div class="arch-flow reveal">
+      <div class="arch-node">
+        <div class="icon">👤</div>
+        <h4>User A</h4>
+        <p>Generates Ed25519 identity keys locally</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="icon">📡</div>
+        <h4>Signal Server</h4>
+        <p>Facilitates peer discovery only</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="icon">🔗</div>
+        <h4>WebRTC</h4>
+        <p>Direct P2P encrypted channel</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="icon">👤</div>
+        <h4>User B</h4>
+        <p>Decrypts with local private keys</p>
+      </div>
+    </div>
+
+    <div class="arch-detail">
+      <div class="arch-card reveal">
+        <h4>🐍 Backend: Python 3.13+</h4>
+        <p>
+          The Veilcord backend is built on Python 3.13 with asynchronous I/O handling for high-performance networking.
+          The signaling server uses WebSocket connections to coordinate peer discovery and relay encrypted ICE candidates
+          during the WebRTC handshake process. After connection establishment, the server plays no role in the conversation.
+          The backend also handles public key distribution for initial contact verification, though users are encouraged
+          to verify key fingerprints through an out-of-band channel for maximum security.
+        </p>
+      </div>
+      <div class="arch-card reveal reveal-delay-1">
+        <h4>⚛️ Frontend: React 19+</h4>
+        <p>
+          The user interface is built with React 19 featuring a Discord-inspired dark theme with blood-red accents.
+          The frontend implements virtual scrolling for handling thousands of messages without performance degradation,
+          Framer Motion for smooth, polished animations and transitions, and a responsive layout that adapts to various
+          screen sizes. All cryptographic operations including key generation, encryption, and decryption happen directly
+          in the browser context using the Web Crypto API and custom Signal Protocol implementation.
+        </p>
+      </div>
+      <div class="arch-card reveal reveal-delay-2">
+        <h4>🗄️ Storage: SQLCipher + DPAPI</h4>
+        <p>
+          Local data persistence uses SQLCipher — a full-database encryption extension for SQLite that provides
+          transparent 256-bit AES encryption of the entire database file. The database encryption key is protected
+          by Windows Data Protection API (DPAPI), which ties the key to the current Windows user account. This means
+          your message history is encrypted at rest without requiring you to remember a master password, while remaining
+          completely inaccessible to anyone who doesn't have access to your Windows user session.
+        </p>
+      </div>
+      <div class="arch-card reveal reveal-delay-3">
+        <h4>🎙️ Media: WebRTC + Opus + VP8</h4>
+        <p>
+          Voice and video calling is powered by WebRTC with Opus audio codec for studio-quality audio at remarkably low
+          bitrates. Video uses adaptive VP8 encoding with automatic quality scaling based on available bandwidth and CPU
+          resources. The media pipeline includes AI-powered noise cancellation via DeepFilterNet3, real-time voice effects
+          with pitch shifting and reverb processing, and virtual backgrounds using MediaPipe segmentation — all running
+          locally on your device with hardware acceleration when available.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== ENCRYPTION DEEP DIVE ========== -->
+<section id="encryption">
+  <div class="section-container">
+    <div class="section-label reveal">Encryption Layers</div>
+    <h2 class="section-title reveal reveal-delay-1">Four Layers of<br>Cryptographic Protection</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Veilcord implements defense-in-depth with multiple overlapping layers of encryption,
+      each designed to protect against different threat models and attack vectors.
+    </p>
+
+    <div class="encryption-layers">
+      <div class="enc-layer reveal">
+        <div class="enc-num">01</div>
+        <div class="enc-content">
+          <h4>Identity Layer: Ed25519 Key Pairs</h4>
+          <p>
+            Every Veilcord user generates a unique Ed25519 identity key pair on first launch. The private key never leaves
+            the device — it is stored in the SQLCipher-encrypted database and protected by DPAPI. The corresponding public key
+            serves as your cryptographic identity and is shared with contacts to establish secure channels. Ed25519 was chosen
+            for its excellent security properties, resistance to timing attacks, small key sizes (32 bytes), and extremely fast
+            signature verification. Your Veilcord identity is fundamentally a cryptographic key pair, not an email address
+            or phone number — there is no personally identifiable information required to use the platform.
+          </p>
+          <div>
+            <span class="enc-tag">Ed25519</span>
+            <span class="enc-tag">Curve25519</span>
+            <span class="enc-tag">32-byte Keys</span>
+            <span class="enc-tag">No PII Required</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="enc-layer reveal">
+        <div class="enc-num">02</div>
+        <div class="enc-content">
+          <h4>Session Layer: X3DH Key Agreement</h4>
+          <p>
+            When two users initiate a conversation for the first time, the Extended Triple Diffie-Hellman (X3DH) protocol
+            establishes a shared secret through four parallel Diffie-Hellman computations using a combination of long-term
+            identity keys, medium-term signed prekeys, and one-time use ephemeral keys. This protocol provides cryptographic
+            deniability — neither party can prove to a third party what the other said — while simultaneously providing
+            authentication that the conversation partner is who they claim to be. The resulting shared secret is used to
+            initialize the Double Ratchet algorithm for all subsequent message encryption.
+          </p>
+          <div>
+            <span class="enc-tag">X3DH</span>
+            <span class="enc-tag">X25519 DH</span>
+            <span class="enc-tag">Signed Prekeys</span>
+            <span class="enc-tag">One-time Prekeys</span>
+            <span class="enc-tag">HKDF Derivation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="enc-layer reveal">
+        <div class="enc-num">03</div>
+        <div class="enc-content">
+          <h4>Message Layer: Double Ratchet Algorithm</h4>
+          <p>
+            Every message is encrypted with a unique key derived from the Double Ratchet algorithm, which combines a symmetric-key
+            ratchet (using HMAC-based key derivation) with a Diffie-Hellman ratchet (generating new key pairs with each message exchange).
+            This provides both perfect forward secrecy — compromising a current key cannot decrypt past messages — and future secrecy
+            (also called "self-healing") — the protocol automatically recovers security after a temporary key compromise. The result is
+            that every single message in a conversation uses a different encryption key, and there is no single "master key" whose
+            compromise would unlock an entire conversation history.
+          </p>
+          <div>
+            <span class="enc-tag">Double Ratchet</span>
+            <span class="enc-tag">AES-256-GCM</span>
+            <span class="enc-tag">HMAC-SHA256</span>
+            <span class="enc-tag">Per-message Keys</span>
+            <span class="enc-tag">Forward Secrecy</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="enc-layer reveal">
+        <div class="enc-num">04</div>
+        <div class="enc-content">
+          <h4>Storage Layer: SQLCipher + DPAPI</h4>
+          <p>
+            Local data-at-rest protection is provided by SQLCipher, which applies page-level AES-256-CBC encryption to the
+            entire SQLite database. Every page of data is individually encrypted and authenticated with its own HMAC, providing
+            tamper detection in addition to confidentiality. The database encryption key is derived using PBKDF2 with 256,000
+            iterations and is itself protected by Windows Data Protection API (DPAPI), which encrypts it using credentials tied
+            to the current Windows user session. This two-layer approach means your message history is encrypted at rest without
+            the friction of a master password, while remaining resistant to offline attacks even if the database file is extracted
+            from your device.
+          </p>
+          <div>
+            <span class="enc-tag">SQLCipher</span>
+            <span class="enc-tag">AES-256-CBC</span>
+            <span class="enc-tag">PBKDF2</span>
+            <span class="enc-tag">256K Iterations</span>
+            <span class="enc-tag">DPAPI</span>
+            <span class="enc-tag">Per-page HMAC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== COMMUNICATION ========== -->
+<section id="communication">
+  <div class="section-container">
+    <div class="section-label reveal">Communication Suite</div>
+    <h2 class="section-title reveal reveal-delay-1">Full-Featured Messaging<br>Without the Surveillance</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Veilcord provides every communication tool you expect from a modern messenger,
+      with each feature built from the ground up to prioritize your privacy.
+    </p>
+
+    <div class="comm-grid">
+      <div class="comm-card reveal">
+        <div class="emoji">💬</div>
+        <h3>Encrypted Text Messaging</h3>
+        <p>
+          Rich text messaging with support for reactions, threaded replies, message editing, and deletion.
+          Every message is encrypted with the Signal Protocol before leaving your device. Messages are transmitted
+          directly between peers via WebRTC data channels, meaning they never pass through any server infrastructure.
+          The interface supports virtual scrolling for fluid performance even in conversations with thousands of messages,
+          and message search operates entirely locally on your encrypted database — no cloud indexing required.
+        </p>
+      </div>
+      <div class="comm-card reveal reveal-delay-1">
+        <div class="emoji">🎙️</div>
+        <h3>HD Voice & Video Calls</h3>
+        <p>
+          High-definition voice and video calling powered by WebRTC with the Opus codec for audio and adaptive VP8 for video.
+          Group calls use mesh topology where each participant maintains a direct encrypted connection to every other participant —
+          no mixing server ever processes your audio or video streams. The built-in noise cancellation system uses AI-powered DeepFilterNet3
+          and RNNoise models to eliminate background noise in real-time, entirely on your local device. Screen sharing is fully supported
+          with cursor highlighting and optional watermarking for professional use cases.
+        </p>
+      </div>
+      <div class="comm-card reveal reveal-delay-2">
+        <div class="emoji">🎨</div>
+        <h3>Audio & Video Effects</h3>
+        <p>
+          A comprehensive effects pipeline lets you customize your communication experience. Audio effects include real-time pitch
+          shifting, reverb, and a professional vocal chain with compressor, equalizer, de-esser, and noise gate. Video effects
+          include virtual backgrounds (blur, custom image, or animated), beauty filters with skin smoothing and brightening, creative
+          filters like grayscale, sepia, and vignette, and even augmented reality overlays with face-tracked glasses, hats, and masks
+          powered by MediaPipe. All processing happens locally with automatic hardware acceleration detection.
+        </p>
+      </div>
+      <div class="comm-card reveal reveal-delay-3">
+        <div class="emoji">👥</div>
+        <h3>Encrypted Group Communication</h3>
+        <p>
+          Group messaging uses the Sender Keys protocol for efficient encryption — each group member generates a unique sender key
+          that is distributed to other members via pairwise Signal Protocol channels. This allows a single encryption operation per
+          message regardless of group size, while maintaining the security properties of individual message encryption. Group calls
+          maintain full mesh connectivity between all participants, ensuring that no central mixing server ever processes any media
+          stream. Group membership changes trigger automatic key rotation to maintain forward secrecy.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== AUDIO/VIDEO EFFECTS ========== -->
+<section id="effects">
+  <div class="section-container">
+    <div class="section-label reveal">Effects Engine</div>
+    <h2 class="section-title reveal reveal-delay-1">Professional-Grade<br>Audio & Video Processing</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Every effect runs locally on your device — no cloud processing, no data leaks.
+      Hardware acceleration is automatically detected and utilized for smooth performance.
+    </p>
+
+    <div class="effects-showcase reveal">
+      <div class="effect-row">
+        <div class="effect-pill"><span class="emoji">🎤</span> DeepFilterNet3 Noise Cancellation</div>
+        <div class="effect-pill"><span class="emoji">🔊</span> Real-time Pitch Shifting</div>
+        <div class="effect-pill"><span class="emoji">🎵</span> Reverb Processing</div>
+        <div class="effect-pill"><span class="emoji">🎚️</span> Dynamic Compressor</div>
+        <div class="effect-pill"><span class="emoji">📊</span> Parametric Equalizer</div>
+        <div class="effect-pill"><span class="emoji">🔇</span> Noise Gate</div>
+        <div class="effect-pill"><span class="emoji">🎙️</span> De-esser</div>
+        <div class="effect-pill"><span class="emoji">🎧</span> RNNoise AI Filter</div>
+        <div class="effect-pill"><span class="emoji">🎤</span> DeepFilterNet3 Noise Cancellation</div>
+        <div class="effect-pill"><span class="emoji">🔊</span> Real-time Pitch Shifting</div>
+        <div class="effect-pill"><span class="emoji">🎵</span> Reverb Processing</div>
+        <div class="effect-pill"><span class="emoji">🎚️</span> Dynamic Compressor</div>
+        <div class="effect-pill"><span class="emoji">📊</span> Parametric Equalizer</div>
+        <div class="effect-pill"><span class="emoji">🔇</span> Noise Gate</div>
+        <div class="effect-pill"><span class="emoji">🎙️</span> De-esser</div>
+        <div class="effect-pill"><span class="emoji">🎧</span> RNNoise AI Filter</div>
+      </div>
+      <div class="effect-row">
+        <div class="effect-pill"><span class="emoji">🌫️</span> Virtual Background Blur</div>
+        <div class="effect-pill"><span class="emoji">🖼️</span> Custom Background Images</div>
+        <div class="effect-pill"><span class="emoji">✨</span> Beauty Filter: Smoothing</div>
+        <div class="effect-pill"><span class="emoji">☀️</span> Beauty Filter: Brightening</div>
+        <div class="effect-pill"><span class="emoji">🎭</span> AR Face Masks</div>
+        <div class="effect-pill"><span class="emoji">🕶️</span> AR Face Glasses</div>
+        <div class="effect-pill"><span class="emoji">🎬</span> Grayscale Filter</div>
+        <div class="effect-pill"><span class="emoji">📸</span> Sepia Tone</div>
+        <div class="effect-pill"><span class="emoji">🌫️</span> Virtual Background Blur</div>
+        <div class="effect-pill"><span class="emoji">🖼️</span> Custom Background Images</div>
+        <div class="effect-pill"><span class="emoji">✨</span> Beauty Filter: Smoothing</div>
+        <div class="effect-pill"><span class="emoji">☀️</span> Beauty Filter: Brightening</div>
+        <div class="effect-pill"><span class="emoji">🎭</span> AR Face Masks</div>
+        <div class="effect-pill"><span class="emoji">🕶️</span> AR Face Glasses</div>
+        <div class="effect-pill"><span class="emoji">🎬</span> Grayscale Filter</div>
+        <div class="effect-pill"><span class="emoji">📸</span> Sepia Tone</div>
+      </div>
+    </div>
+
+    <div class="effects-detail">
+      <div class="effect-detail-card reveal">
+        <h4>🎤 AI Noise Cancellation</h4>
+        <p>
+          Dual-engine noise suppression combining DeepFilterNet3 (a deep learning model trained on thousands of hours of noisy audio)
+          with RNNoise (a recurrent neural network optimized for real-time processing). The system automatically selects the best
+          engine based on your hardware capabilities. Eliminates keyboard typing, background conversations, traffic noise, fan hum,
+          and other common audio artifacts while preserving natural voice quality and nuance.
+        </p>
+      </div>
+      <div class="effect-detail-card reveal reveal-delay-1">
+        <h4>🎬 Virtual Backgrounds</h4>
+        <p>
+          MediaPipe-powered body segmentation enables real-time background replacement with minimal CPU overhead.
+          Choose from background blur with adjustable intensity, custom static images, or animated backgrounds.
+          The segmentation model runs entirely locally — your video frames never leave your device. Automatic edge
+          refinement ensures clean separation between foreground and background even in complex lighting conditions.
+        </p>
+      </div>
+      <div class="effect-detail-card reveal reveal-delay-2">
+        <h4>🎭 AR Overlays</h4>
+        <p>
+          Face-tracked augmented reality overlays powered by MediaPipe Face Mesh with 468-point landmark detection.
+          Apply virtual glasses, hats, masks, and other accessories that track your facial movements in real-time
+          with sub-frame latency. The system supports custom overlay creation and dynamically adjusts for head rotation,
+          scale, and occlusion. Screen sharing overlays include configurable watermarks, decorative borders, and
+          highlighted cursor tracking for professional presentations and tutorials.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== PRIVACY MANIFESTO ========== -->
+<section id="privacy">
+  <div class="privacy-bg"></div>
+  <div class="section-container">
+    <div class="section-label reveal">Privacy Manifesto</div>
+    <h2 class="section-title reveal reveal-delay-1">Our Uncompromising<br>Commitment to Privacy</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Privacy is not a feature — it is the foundation upon which every line of Veilcord's code is built.
+      These are our principles, and they are non-negotiable.
+    </p>
+
+    <div class="manifesto">
+      <div class="manifesto-block reveal">
+        <h3>Your Keys, Your Control</h3>
+        <p>
+          Cryptographic identity keys are generated on your device using a cryptographically secure random number generator and
+          stored in an encrypted database that only you can access. At no point during the key generation, storage, or usage
+          process does any key material leave your device or become accessible to any server infrastructure. This is not a
+          policy decision — it is an architectural impossibility enforced by the design of the system itself. Even if we
+          wanted to access your keys, we could not. The system was built to make it technically impossible.
+        </p>
+      </div>
+
+      <div class="manifesto-block reveal">
+        <h3>No Metadata Collection</h3>
+        <p>
+          Traditional end-to-end encrypted messengers still collect significant metadata: who you communicate with, when and
+          how often you communicate, your IP address, device fingerprint, and location data. This metadata alone can reveal
+          extraordinarily detailed information about your life, relationships, habits, and movements. Veilcord's peer-to-peer
+          architecture eliminates this attack surface entirely. The signaling server sees only ephemeral connection establishment
+          data that is not logged or stored. Once a P2P connection is established, the server has no visibility into the
+          communication whatsoever — not even that communication is occurring.
+        </p>
+      </div>
+
+      <div class="manifesto-block reveal">
+        <h3>Open Source Transparency</h3>
+        <p>
+          Every line of Veilcord's code is published on GitHub for public review. We believe that security through obscurity
+          is no security at all. By making our source code freely available, we invite the global security community to audit
+          our cryptographic implementations, identify potential vulnerabilities, and verify that our privacy claims are
+          backed by technical reality. The encryption implementation follows published academic specifications exactly, using
+          well-vetted cryptographic libraries rather than custom implementations. We believe you should never have to trust
+          a company's word about your privacy — you should be able to verify it yourself.
+        </p>
+      </div>
+
+      <div class="manifesto-block reveal">
+        <h3>No Accounts, No Phone Numbers</h3>
+        <p>
+          Veilcord does not require an email address, phone number, or any form of personally identifiable information to
+          create an identity. Your identity on the network is your Ed25519 public key — a 32-byte cryptographic value that
+          reveals nothing about who you are in the physical world. Contact discovery happens through direct key exchange
+          between users, not through server-side contact list uploads. This means there is no central directory mapping
+          cryptographic identities to real-world identities, and no mechanism by which an adversary could enumerate or
+          de-anonymize the user base.
+        </p>
+      </div>
+
+      <div class="manifesto-block reveal">
+        <h3>Resistant to Compulsion</h3>
+        <p>
+          The architecture of Veilcord is designed such that even under legal compulsion — a court order, a national security
+          letter, or a government warrant — there is nothing of value to hand over. The signaling server does not log connection
+          metadata. There are no message databases on any server. Encryption keys exist only on user devices. This is not a
+          matter of policy (which can be changed) but of architecture (which cannot be circumvented without fundamentally
+          rebuilding the system). We cannot provide what we do not have, and we have designed the system specifically to ensure
+          that we have nothing to provide.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== COMPARISON ========== -->
+<section id="comparison">
+  <div class="section-container">
+    <div class="section-label reveal">How We Compare</div>
+    <h2 class="section-title reveal reveal-delay-1">Veilcord vs. The Competition</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      An honest, transparent comparison of privacy and security features across popular messaging platforms.
+    </p>
+
+    <div class="comparison-table reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="highlight">Veilcord</th>
+            <th>Signal</th>
+            <th>Discord</th>
+            <th>Telegram</th>
+            <th>WhatsApp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>End-to-End Encryption</td>
+            <td class="highlight"><span class="check">✓</span> Always</td>
+            <td><span class="check">✓</span> Always</td>
+            <td><span class="cross">✗</span> Never</td>
+            <td>Optional</td>
+            <td><span class="check">✓</span> Always</td>
+          </tr>
+          <tr>
+            <td>Peer-to-Peer Architecture</td>
+            <td class="highlight"><span class="check">✓</span> Full P2P</td>
+            <td><span class="cross">✗</span> Server-routed</td>
+            <td><span class="cross">✗</span> Server-routed</td>
+            <td><span class="cross">✗</span> Server-routed</td>
+            <td><span class="cross">✗</span> Server-routed</td>
+          </tr>
+          <tr>
+            <td>No Metadata Logging</td>
+            <td class="highlight"><span class="check">✓</span> By design</td>
+            <td>Minimal</td>
+            <td><span class="cross">✗</span> Extensive</td>
+            <td><span class="cross">✗</span> Extensive</td>
+            <td><span class="cross">✗</span> Extensive</td>
+          </tr>
+          <tr>
+            <td>No Phone/Email Required</td>
+            <td class="highlight"><span class="check">✓</span></td>
+            <td><span class="cross">✗</span> Phone required</td>
+            <td><span class="cross">✗</span> Email required</td>
+            <td><span class="cross">✗</span> Phone required</td>
+            <td><span class="cross">✗</span> Phone required</td>
+          </tr>
+          <tr>
+            <td>Open Source</td>
+            <td class="highlight"><span class="check">✓</span> Full</td>
+            <td><span class="check">✓</span> Full</td>
+            <td><span class="cross">✗</span></td>
+            <td>Partial</td>
+            <td><span class="cross">✗</span></td>
+          </tr>
+          <tr>
+            <td>Voice & Video Calls</td>
+            <td class="highlight"><span class="check">✓</span> E2E P2P</td>
+            <td><span class="check">✓</span> E2E</td>
+            <td><span class="check">✓</span> Not E2E</td>
+            <td><span class="check">✓</span> Not E2E</td>
+            <td><span class="check">✓</span> E2E</td>
+          </tr>
+          <tr>
+            <td>AI Noise Cancellation</td>
+            <td class="highlight"><span class="check">✓</span> Local AI</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="check">✓</span> Cloud</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+          </tr>
+          <tr>
+            <td>Virtual Backgrounds</td>
+            <td class="highlight"><span class="check">✓</span> Local</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+          </tr>
+          <tr>
+            <td>AR Face Filters</td>
+            <td class="highlight"><span class="check">✓</span> Local</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+          </tr>
+          <tr>
+            <td>Encrypted Local Storage</td>
+            <td class="highlight"><span class="check">✓</span> SQLCipher</td>
+            <td><span class="check">✓</span> SQLCipher</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Zero-Knowledge Architecture</td>
+            <td class="highlight"><span class="check">✓</span></td>
+            <td>Partial</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== TECH STACK ========== -->
+<section id="tech">
+  <div class="section-container">
+    <div class="section-label reveal">Technology Stack</div>
+    <h2 class="section-title reveal reveal-delay-1">Built With the Best<br>Open Source Technology</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Every technology in Veilcord's stack was chosen for its maturity, security track record,
+      and active community maintenance.
+    </p>
+
+    <div class="tech-grid">
+      <div class="tech-item reveal">
+        <div class="icon">🐍</div>
+        <h4>Python 3.13+</h4>
+        <p>Backend & signaling server</p>
+      </div>
+      <div class="tech-item reveal reveal-delay-1">
+        <div class="icon">⚛️</div>
+        <h4>React 19+</h4>
+        <p>Frontend user interface</p>
+      </div>
+      <div class="tech-item reveal reveal-delay-2">
+        <div class="icon">🔐</div>
+        <h4>Signal Protocol</h4>
+        <p>E2E encryption framework</p>
+      </div>
+      <div class="tech-item reveal reveal-delay-3">
+        <div class="icon">🌐</div>
+        <h4>WebRTC</h4>
+        <p>P2P connections & media</p>
+      </div>
+      <div class="tech-item reveal reveal-delay-1">
+        <div class="icon">🗄️</div>
+        <h4>SQLCipher</h4>
+        <p>Encrypted local database</p>
+      </div>
+      <div class="tech-item reveal reveal-delay-2">
+        <div class="icon">🎵</div>
+        <h4>Opus Codec</h4>
+        <p>High-quality audio</p>
+      </div>
+      <div class="tech-item reveal reveal-delay-3">
+        <div class="icon">🧠</div>
+        <h4>DeepFilterNet3</h4>
+        <p>AI noise cancellation</p>
+      </div>
+      <div class="tech-item reveal reveal-delay-4">
+        <div class="icon">👁️</div>
+        <h4>MediaPipe</h4>
+        <p>AR & body segmentation</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== QUICK START ========== -->
+<section id="quickstart">
+  <div class="section-container">
+    <div class="section-label reveal">Getting Started</div>
+    <h2 class="section-title reveal reveal-delay-1">Up and Running<br>in Three Steps</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Veilcord is designed to be as simple to use as any mainstream messenger,
+      with all the cryptographic complexity handled invisibly behind the scenes.
+    </p>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <h3>Download & Launch</h3>
+        <p>
+          Download the latest release from GitHub, extract the ZIP file to your preferred location, and run Veilcord.exe.
+          On first launch, the application will automatically generate your Ed25519 identity key pair, create an encrypted
+          local database in your AppData directory, and connect to the signaling server for peer discovery. No account
+          creation, no email, no phone number — you're ready in seconds.
+        </p>
+        <code>→ Veilcord.exe</code>
+      </div>
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">02</div>
+        <h3>Exchange Public Keys</h3>
+        <p>
+          Open the Settings panel by clicking the gear icon to view your public key. Share this key with your contacts
+          through any channel you trust — in person, via another messenger, or through a QR code. Then add their public
+          key in the Contacts panel. For maximum security, verify key fingerprints through an out-of-band channel to prevent
+          man-in-the-middle attacks during initial key exchange.
+        </p>
+        <code>→ Settings → Copy Public Key</code>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">03</div>
+        <h3>Start Communicating</h3>
+        <p>
+          Click on a contact to initiate a secure peer-to-peer connection. The status indicator will turn green when the
+          direct encrypted channel is established. You can now send text messages, files, voice messages, and initiate voice
+          or video calls — all encrypted end-to-end and transmitted directly between your device and your contact's device
+          without any server intermediary.
+        </p>
+        <code>→ Contact → Chat / Call</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ========== FAQ ========== -->
+<section id="faq">
+  <div class="section-container">
+    <div class="section-label reveal">FAQ</div>
+    <h2 class="section-title reveal reveal-delay-1">Frequently Asked Questions</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Everything you need to know about Veilcord, from technical details to practical usage.
+    </p>
+
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <div class="faq-question">
+          Is Veilcord truly peer-to-peer? What role does the server play?
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>
+            Yes, Veilcord is a genuine peer-to-peer application. The signaling server's role is strictly limited to initial peer
+            discovery and WebRTC connection establishment (ICE candidate relay). Once two peers establish a direct connection,
+            all subsequent communication — messages, files, voice, and video — flows directly between the two devices with zero
+            server involvement. The server never sees message content, and connection metadata is not logged or stored. If the
+            signaling server goes offline after a connection is established, your active conversations continue uninterrupted.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <div class="faq-question">
+          What happens if my device is lost or stolen?
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>
+            Your encrypted database is protected by SQLCipher with AES-256 encryption, and the database key is tied to your
+            Windows user session via DPAPI. An attacker who obtains your device but does not have access to your Windows login
+            credentials cannot decrypt your message history. For additional security, you should use full-disk encryption
+            (BitLocker on Windows) and a strong login password. If your device is compromised, generate a new identity on a new
+            device and re-establish contacts — the old identity's keys become useless once you stop using them.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <div class="faq-question">
+          How does group encryption work?
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>
+            Group messaging uses the Sender Keys protocol. Each group member generates a unique sender key and distributes it to
+            all other group members through individual pairwise Signal Protocol channels. When sending a message to the group,
+            the sender encrypts it once with their sender key, and each recipient can decrypt it using the copy of that sender key
+            they received earlier. This is significantly more efficient than encrypting the message individually for each recipient
+            while maintaining strong security properties. When members join or leave the group, a key rotation occurs to maintain
+            forward secrecy.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <div class="faq-question">
+          Which platforms does Veilcord support?
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>
+            Veilcord currently supports Windows (10 and later) as its primary platform. The application is built with Python 3.13+
+            on the backend and React 19+ on the frontend, with DPAPI integration for secure key storage that is specific to the
+            Windows platform. Cross-platform support (macOS, Linux) is on the roadmap and would require implementing platform-specific
+            secure key storage equivalents (Keychain on macOS, Secret Service on Linux). The React frontend would remain largely
+            unchanged across platforms.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <div class="faq-question">
+          Can I audit the encryption implementation?
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>
+            Absolutely. Veilcord is fully open source under a dual license. The complete source code, including all cryptographic
+            implementations, is available on GitHub at github.com/mateuszsury/veilcord. We encourage security researchers and
+            cryptography enthusiasts to review, audit, and report any findings. The encryption implementation follows the published
+            Signal Protocol specifications and uses established cryptographic libraries rather than custom primitives. We believe
+            that verifiable security is the only real security.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item reveal">
+        <div class="faq-question">
+          Do the AI-powered features (noise cancellation, backgrounds) send data to the cloud?
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>
+            No. All AI and machine learning processing in Veilcord runs entirely locally on your device. The DeepFilterNet3 and
+            RNNoise noise cancellation models, MediaPipe body segmentation for virtual backgrounds, and MediaPipe Face Mesh for
+            AR overlays all execute on your local CPU or GPU. No audio or video frames are ever sent to any cloud service for
+            processing. The application automatically detects your hardware capabilities and adjusts processing quality accordingly
+            to maintain smooth performance without relying on external compute resources.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA ========== -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="section-container">
+    <div class="section-label reveal" style="justify-content: center;">Take Back Your Privacy</div>
+    <h2 class="section-title reveal reveal-delay-1">
+      Ready to Communicate<br>Without Compromise?
+    </h2>
+    <p class="section-desc reveal reveal-delay-2">
+      Download Veilcord today and join the growing community of users who refuse to sacrifice their privacy
+      for convenience. Open source, peer-to-peer, encrypted by default.
+    </p>
+    <div class="hero-actions reveal reveal-delay-3">
+      <a href="https://github.com/mateuszsury/veilcord/releases" target="_blank" class="btn btn-primary">
+        ⬇ Download Latest Release
+      </a>
+      <a href="https://github.com/mateuszsury/veilcord" target="_blank" class="btn btn-secondary">
+        📖 Read the Source Code
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo">
+        <div class="logo-icon">V</div>
+        Veilcord
+      </div>
+      <p>
+        Secure peer-to-peer encrypted messenger with Signal Protocol, WebRTC voice and video calls,
+        and zero-knowledge architecture. Private by design, encrypted by default.
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#encryption">Encryption</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#comparison">Comparison</a></li>
+        <li><a href="#quickstart">Quick Start</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <ul>
+        <li><a href="https://github.com/mateuszsury/veilcord" target="_blank">GitHub Repository</a></li>
+        <li><a href="https://github.com/mateuszsury/veilcord/releases" target="_blank">Releases</a></li>
+        <li><a href="https://github.com/mateuszsury/veilcord/blob/main/CHANGELOG.md" target="_blank">Changelog</a></li>
+        <li><a href="https://github.com/mateuszsury/veilcord/blob/main/LICENSE" target="_blank">License</a></li>
+        <li><a href="https://github.com/mateuszsury/veilcord/discussions" target="_blank">Discussions</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="https://github.com/mateuszsury/veilcord/issues" target="_blank">Report a Bug</a></li>
+        <li><a href="https://github.com/mateuszsury/veilcord/pulls" target="_blank">Contribute</a></li>
+        <li><a href="https://github.com/mateuszsury/veilcord/security" target="_blank">Security Policy</a></li>
+        <li><a href="https://mateuszsury.eu" target="_blank">Author's Website</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Veilcord by Mateusz Sury. Private by design. Encrypted by default.</span>
+    <div class="footer-social">
+      <a href="https://github.com/mateuszsury/veilcord" target="_blank" title="GitHub">⭐</a>
+      <a href="https://mateuszsury.eu" target="_blank" title="Website">🌐</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+// ===== Custom Cursor =====
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mouseX = 0, mouseY = 0;
+let ringX = 0, ringY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  dot.style.left = mouseX - 4 + 'px';
+  dot.style.top = mouseY - 4 + 'px';
+});
+
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.15;
+  ringY += (mouseY - ringY) * 0.15;
+  ring.style.left = ringX - 18 + 'px';
+  ring.style.top = ringY - 18 + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a, button, .faq-question, .feature-card, .comm-card, .tech-item, .step, .btn').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+});
+
+// ===== Navbar Scroll =====
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ===== Scroll Reveal =====
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+reveals.forEach(el => observer.observe(el));
+
+// ===== FAQ Accordion =====
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+
+// ===== Particles =====
+const particlesContainer = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (8 + Math.random() * 12) + 's';
+  p.style.animationDelay = Math.random() * 10 + 's';
+  p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
+  particlesContainer.appendChild(p);
+}
+
+// ===== Mobile Menu Toggle =====
+const mobileToggle = document.getElementById('mobileToggle');
+const navLinks = document.querySelector('.nav-links');
+mobileToggle.addEventListener('click', () => {
+  const isOpen = navLinks.style.display === 'flex';
+  navLinks.style.display = isOpen ? 'none' : 'flex';
+  navLinks.style.position = 'fixed';
+  navLinks.style.top = '72px';
+  navLinks.style.left = '0';
+  navLinks.style.right = '0';
+  navLinks.style.background = 'rgba(5,5,8,0.97)';
+  navLinks.style.flexDirection = 'column';
+  navLinks.style.padding = '24px';
+  navLinks.style.gap = '20px';
+  navLinks.style.borderBottom = '1px solid var(--border-medium)';
+  navLinks.style.zIndex = '999';
+  if (isOpen) navLinks.removeAttribute('style');
+});
+
+// ===== Smooth Scroll for Nav =====
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Close mobile menu
+      if (window.innerWidth <= 768) navLinks.removeAttribute('style');
+    }
+  });
+});
+
+// ===== Counter Animation =====
+function animateCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count);
+    let current = 0;
+    const step = target / 40;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        el.textContent = target;
+        clearInterval(timer);
+      } else {
+        el.textContent = Math.floor(current);
+      }
+    }, 30);
+  });
+}
+
+const heroObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateCounters();
+      heroObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+const heroStats = document.querySelector('.hero-stats');
+if (heroStats) heroObserver.observe(heroStats);
+</script>
+</body>
+</html>

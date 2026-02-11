@@ -1,0 +1,29 @@
+{% set local = name|default("anon")|trim %}
+{% if local == "Ana" and count >= 2 %}
+COND_OK
+{% else %}
+COND_BAD
+{% endif %}
+{% if role in roles %}
+ROLE_IN
+{% endif %}
+{% if "admin" not in roles %}
+NO_ADMIN
+{% endif %}
+{% if missing is undefined %}
+MISSING_UNDEFINED
+{% endif %}
+{% if none_val is none %}
+NONE_OK
+{% endif %}
+{% if local is string %}
+LOCAL_STRING
+{% endif %}
+{% for item in items %}
+ITEM={{ loop.index }}/{{ loop.length }}/{{ loop.revindex0 }}:{{ item|replace("<", "(")|replace(">", ")") }}
+{% else %}
+NO_ITEMS
+{% endfor %}
+JOIN={{ items|join(" | ") }}
+TITLE={{ local|title }}
+CAP={{ local|capitalize }}

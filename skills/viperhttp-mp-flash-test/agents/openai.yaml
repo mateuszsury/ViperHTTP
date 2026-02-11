@@ -1,0 +1,4 @@
+interface:
+  display_name: "MicroPython Flash & Test"
+  short_description: "Build/flash ViperHTTP firmware and run device tests"
+  default_prompt: "Build in WSL, flash via esptool/mpremote, sync VFS, start server, and run host_full_test with diagnostics and best practices."
