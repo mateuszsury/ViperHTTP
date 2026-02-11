@@ -1,0 +1,4 @@
+interface:
+  display_name: "ViperHTTP Core C"
+  short_description: "FastAPI-like C core, parser, router, WS"
+  default_prompt: "Use $viperhttp-core-c to implement the C core: parser, router, middleware, WebSocket, and serialization."

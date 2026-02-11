@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  host-core-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install host build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Generate vectors and run host C tests
+        run: |
+          bash tools/run_parser_tests.sh
+          bash tools/run_router_tests.sh
+          bash tools/run_pool_tests.sh
+          bash tools/run_pipeline_tests.sh
+          bash tools/run_ipc_tests.sh
+
+  python-sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Syntax check Python modules
+        run: |
+          python -m py_compile viperhttp_app.py
+          python -m py_compile viperhttp_auth.py
+          python -m py_compile viperhttp_autodocs.py
+          python -m py_compile viperhttp_bridge.py
+          python -m py_compile viperhttp_lifespan.py
+          python -m py_compile viperhttp_ota.py
+          python -m py_compile viperhttp_responses.py
+          python -m py_compile viperhttp_session.py
+          python -m py_compile viperhttp_ws.py

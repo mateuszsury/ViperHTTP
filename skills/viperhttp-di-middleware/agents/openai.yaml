@@ -1,0 +1,4 @@
+interface:
+  display_name: "ViperHTTP DI and Middleware"
+  short_description: "Depends, middleware stack, exceptions, routers"
+  default_prompt: "Use $viperhttp-di-middleware to implement Depends, middleware ordering, and exception handling."

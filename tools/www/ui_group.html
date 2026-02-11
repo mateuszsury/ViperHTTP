@@ -1,0 +1,34 @@
+<section class="group-card">
+  <header class="group-head">
+    <div>
+      <h2>{{ group.title|escape }}</h2>
+      <p>{{ group.description|default("No description")|escape }}</p>
+    </div>
+    <span class="group-count">{{ group.tests|length }}</span>
+  </header>
+  <div class="tests-grid">
+    {% for t in group.tests %}
+    <article class="test-card">
+      <h3>{{ t.name|escape }}</h3>
+      <p class="endpoint">{{ t.method|escape }} {{ t.url|escape }}</p>
+      <p class="expect">{{ t.expect|default("")|escape }}</p>
+      <div class="actions">
+        <a href="{{ t.url|escape }}" target="_blank" rel="noopener">Open</a>
+        <button
+          class="run-btn"
+          data-name="{{ t.name|escape }}"
+          data-method="{{ t.method|escape }}"
+          data-url="{{ t.url|escape }}"
+          data-body="{{ t.body|default('')|escape }}"
+          data-headers="{{ t.headers_json|default('{}')|escape }}"
+          data-ws-message="{{ t.ws_message|default('')|escape }}"
+        >
+          Run
+        </button>
+      </div>
+    </article>
+    {% else %}
+    <article class="test-card empty">No tests in this group.</article>
+    {% endfor %}
+  </div>
+</section>

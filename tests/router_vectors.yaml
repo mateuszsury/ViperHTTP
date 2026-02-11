@@ -1,0 +1,157 @@
+meta:
+  format: v1
+cases:
+  - name: static_root
+    routes:
+      - method: GET
+        pattern: /
+        handler: 1
+    queries:
+      - method: GET
+        path: /
+        expect:
+          result: OK
+          handler: 1
+          params: []
+
+  - name: static_priority
+    routes:
+      - method: GET
+        pattern: /files/new
+        handler: 10
+      - method: GET
+        pattern: /files/{name}
+        handler: 11
+    queries:
+      - method: GET
+        path: /files/new
+        expect:
+          result: OK
+          handler: 10
+          params: []
+      - method: GET
+        path: /files/old
+        expect:
+          result: OK
+          handler: 11
+          params:
+            - name: name
+              value: old
+              type: str
+
+  - name: param_int
+    routes:
+      - method: GET
+        pattern: /items/{id:int}
+        handler: 20
+    queries:
+      - method: GET
+        path: /items/42
+        expect:
+          result: OK
+          handler: 20
+          params:
+            - name: id
+              value: 42
+              type: int
+      - method: GET
+        path: /items/abc
+        expect:
+          result: NOT_FOUND
+
+  - name: param_float
+    routes:
+      - method: GET
+        pattern: /sensor/{value:float}
+        handler: 30
+    queries:
+      - method: GET
+        path: /sensor/12.5
+        expect:
+          result: OK
+          handler: 30
+          params:
+            - name: value
+              value: 12.5
+              type: float
+      - method: GET
+        path: /sensor/-7
+        expect:
+          result: OK
+          handler: 30
+          params:
+            - name: value
+              value: -7
+              type: float
+
+  - name: param_path
+    routes:
+      - method: GET
+        pattern: /static/{path:path}
+        handler: 40
+    queries:
+      - method: GET
+        path: /static/js/app.js
+        expect:
+          result: OK
+          handler: 40
+          params:
+            - name: path
+              value: js/app.js
+              type: path
+
+  - name: conflict_param_name
+    routes:
+      - method: GET
+        pattern: /items/{id:int}
+        handler: 50
+      - method: GET
+        pattern: /items/{item_id:int}
+        handler: 51
+        add_result: CONFLICT
+    queries:
+      - method: GET
+        path: /items/1
+        expect:
+          result: OK
+          handler: 50
+          params:
+            - name: id
+              value: 1
+              type: int
+
+  - name: conflict_param_type
+    routes:
+      - method: GET
+        pattern: /items/{id:int}
+        handler: 60
+      - method: GET
+        pattern: /items/{id:float}
+        handler: 61
+        add_result: CONFLICT
+    queries:
+      - method: GET
+        path: /items/2
+        expect:
+          result: OK
+          handler: 60
+          params:
+            - name: id
+              value: 2
+              type: int
+
+  - name: path_not_last
+    routes:
+      - method: GET
+        pattern: /files/{path:path}/extra
+        handler: 70
+        add_result: UNSUPPORTED
+    queries: []
+
+  - name: invalid_type
+    routes:
+      - method: GET
+        pattern: /bad/{id:bad}
+        handler: 80
+        add_result: INVALID
+    queries: []

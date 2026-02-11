@@ -1,0 +1,436 @@
+#ifndef VHTTP_CONFIG_H
+#define VHTTP_CONFIG_H
+
+// Parser and routing limits (defaults; can be overridden by build system).
+#ifndef VHTTP_MAX_HEADERS
+#define VHTTP_MAX_HEADERS 24
+#endif
+
+#ifndef VHTTP_MAX_URI_LEN
+#define VHTTP_MAX_URI_LEN 512
+#endif
+
+#ifndef VHTTP_MAX_HEADER_SIZE
+#define VHTTP_MAX_HEADER_SIZE 4096
+#endif
+
+#ifndef VHTTP_MAX_BODY_SIZE
+#define VHTTP_MAX_BODY_SIZE 65536
+#endif
+
+#ifndef VHTTP_MAX_PATH_PARAMS
+#define VHTTP_MAX_PATH_PARAMS 8
+#endif
+
+#ifndef VHTTP_MAX_QUERY_PARAMS
+#define VHTTP_MAX_QUERY_PARAMS 16
+#endif
+
+// Form parsing limits.
+#ifndef VHTTP_MAX_FORM_PARTS
+#define VHTTP_MAX_FORM_PARTS 32
+#endif
+
+#ifndef VHTTP_MAX_FORM_FIELD_SIZE
+#define VHTTP_MAX_FORM_FIELD_SIZE 8192
+#endif
+
+#ifndef VHTTP_MAX_FORM_FILE_SIZE
+#define VHTTP_MAX_FORM_FILE_SIZE VHTTP_MAX_BODY_SIZE
+#endif
+
+// Dependency Injection limits.
+#ifndef VHTTP_MAX_DEPENDENCIES
+#define VHTTP_MAX_DEPENDENCIES 16
+#endif
+
+#ifndef VHTTP_MAX_DEP_CHAIN_DEPTH
+#define VHTTP_MAX_DEP_CHAIN_DEPTH 8
+#endif
+
+// Router limits.
+#ifndef VHTTP_MAX_ROUTES
+#define VHTTP_MAX_ROUTES 1024
+#endif
+
+#ifndef VHTTP_MAX_NODES
+#define VHTTP_MAX_NODES 2048
+#endif
+
+#ifndef VHTTP_MAX_ROUTER_EDGES
+#define VHTTP_MAX_ROUTER_EDGES VHTTP_MAX_NODES
+#endif
+
+#ifndef VHTTP_MAX_SEGMENT_LEN
+#define VHTTP_MAX_SEGMENT_LEN 32
+#endif
+
+#ifndef VHTTP_MAX_PARAM_NAME
+#define VHTTP_MAX_PARAM_NAME 24
+#endif
+
+// Static file mounts.
+#ifndef VHTTP_MAX_MOUNTS
+#define VHTTP_MAX_MOUNTS 4
+#endif
+
+#ifndef VHTTP_MAX_FILE_MOUNTS
+#define VHTTP_MAX_FILE_MOUNTS 16
+#endif
+
+#ifndef VHTTP_STATIC_MAX_PREFIX
+#define VHTTP_STATIC_MAX_PREFIX 64
+#endif
+
+#ifndef VHTTP_STATIC_MAX_ROOT
+#define VHTTP_STATIC_MAX_ROOT 128
+#endif
+
+#ifndef VHTTP_STATIC_MAX_PATH
+#define VHTTP_STATIC_MAX_PATH 512
+#endif
+
+// Static filesystem base path (MicroPython VFS root).
+#ifndef VHTTP_STATIC_FS_BASE
+#define VHTTP_STATIC_FS_BASE "/"
+#endif
+
+#ifndef VHTTP_STATIC_CACHE_MAX_AGE
+#define VHTTP_STATIC_CACHE_MAX_AGE 300
+#endif
+
+#ifndef VHTTP_STATIC_ETAG_HASH_MIN_SIZE
+#define VHTTP_STATIC_ETAG_HASH_MIN_SIZE 0
+#endif
+
+#ifndef VHTTP_STATIC_SERVE_VIA_IPC
+#if defined(ESP_PLATFORM) || defined(VHTTP_ESP_PLATFORM)
+#define VHTTP_STATIC_SERVE_VIA_IPC 1
+#else
+#define VHTTP_STATIC_SERVE_VIA_IPC 0
+#endif
+#endif
+
+// Gzip compression for static responses.
+#ifndef VHTTP_GZIP_ENABLED
+#define VHTTP_GZIP_ENABLED 1
+#endif
+
+#ifndef VHTTP_GZIP_MIN_SIZE
+#define VHTTP_GZIP_MIN_SIZE 1024
+#endif
+
+#ifndef VHTTP_GZIP_LEVEL
+#define VHTTP_GZIP_LEVEL 6
+#endif
+
+#ifndef VHTTP_GZIP_MAX_DEPTH
+#define VHTTP_GZIP_MAX_DEPTH 8
+#endif
+
+// Template engine defaults.
+#ifndef VHTTP_TEMPLATE_MAX_SIZE
+#define VHTTP_TEMPLATE_MAX_SIZE 131072
+#endif
+
+#ifndef VHTTP_TEMPLATE_MAX_NODES
+#define VHTTP_TEMPLATE_MAX_NODES 2048
+#endif
+
+#ifndef VHTTP_TEMPLATE_MAX_DEPTH
+#define VHTTP_TEMPLATE_MAX_DEPTH 16
+#endif
+
+#ifndef VHTTP_TEMPLATE_MAX_INCLUDE_DEPTH
+#define VHTTP_TEMPLATE_MAX_INCLUDE_DEPTH 8
+#endif
+
+#ifndef VHTTP_TEMPLATE_MAX_LOOP_ITERS
+#define VHTTP_TEMPLATE_MAX_LOOP_ITERS 10000
+#endif
+
+#ifndef VHTTP_TEMPLATE_CACHE_ENTRIES
+#define VHTTP_TEMPLATE_CACHE_ENTRIES 8
+#endif
+
+#ifndef VHTTP_TEMPLATE_WARMUP_MAX_DEPTH
+#define VHTTP_TEMPLATE_WARMUP_MAX_DEPTH 8
+#endif
+
+#ifndef VHTTP_TEMPLATE_CACHE_BUDGET_BYTES
+#define VHTTP_TEMPLATE_CACHE_BUDGET_BYTES (128 * 1024)
+#endif
+
+#ifndef VHTTP_TEMPLATE_CACHE_BUDGET_BYTES_PSRAM
+#define VHTTP_TEMPLATE_CACHE_BUDGET_BYTES_PSRAM (768 * 1024)
+#endif
+
+// Connection pool limits.
+#ifndef VHTTP_MAX_CONNECTIONS
+#define VHTTP_MAX_CONNECTIONS 8
+#endif
+
+#ifndef VHTTP_RECV_BUF_SIZE
+#define VHTTP_RECV_BUF_SIZE 4096
+#endif
+
+#ifndef VHTTP_SEND_BUF_SIZE
+#define VHTTP_SEND_BUF_SIZE 8192
+#endif
+
+#ifndef VHTTP_MAX_KEEPALIVE_REQUESTS
+#define VHTTP_MAX_KEEPALIVE_REQUESTS 16
+#endif
+
+// Header build buffer size for server task.
+#ifndef VHTTP_HEADER_BUF_SIZE
+#define VHTTP_HEADER_BUF_SIZE 2048
+#endif
+
+// IPC defaults.
+#ifndef VHTTP_IPC_REQUEST_QUEUE_LEN
+#define VHTTP_IPC_REQUEST_QUEUE_LEN 16
+#endif
+
+#ifndef VHTTP_IPC_RESPONSE_QUEUE_LEN
+#define VHTTP_IPC_RESPONSE_QUEUE_LEN 16
+#endif
+
+#ifndef VHTTP_IPC_RINGBUF_SIZE
+#define VHTTP_IPC_RINGBUF_SIZE 65536
+#endif
+
+#ifndef VHTTP_IPC_RINGBUF_SIZE_PSRAM
+#define VHTTP_IPC_RINGBUF_SIZE_PSRAM 393216
+#endif
+
+#ifndef VHTTP_IPC_USE_PSRAM
+#if defined(ESP_PLATFORM) || defined(VHTTP_ESP_PLATFORM)
+#define VHTTP_IPC_USE_PSRAM 1
+#else
+#define VHTTP_IPC_USE_PSRAM 0
+#endif
+#endif
+
+#ifndef VHTTP_IPC_RING_WAIT_MS
+#define VHTTP_IPC_RING_WAIT_MS 10000
+#endif
+
+#ifndef VHTTP_IPC_RING_WAIT_SLICE_MS
+#define VHTTP_IPC_RING_WAIT_SLICE_MS 5
+#endif
+
+#ifndef VHTTP_IPC_QUEUE_WAIT_MS
+#define VHTTP_IPC_QUEUE_WAIT_MS 10000
+#endif
+
+#ifndef VHTTP_STREAM_BACKPRESSURE_QUEUE_PCT
+#define VHTTP_STREAM_BACKPRESSURE_QUEUE_PCT 75
+#endif
+
+#ifndef VHTTP_STREAM_BACKPRESSURE_RING_PCT
+#define VHTTP_STREAM_BACKPRESSURE_RING_PCT 80
+#endif
+
+#ifndef VHTTP_STREAM_BACKPRESSURE_DELAY_MS
+#define VHTTP_STREAM_BACKPRESSURE_DELAY_MS 1
+#endif
+
+#ifndef VHTTP_STATIC_STREAM_THRESHOLD
+#define VHTTP_STATIC_STREAM_THRESHOLD 65536
+#endif
+
+#ifndef VHTTP_STATIC_STREAM_CHUNK_SIZE
+#define VHTTP_STATIC_STREAM_CHUNK_SIZE 16384
+#endif
+
+// Server task stack size (Core 0).
+#ifndef VHTTP_SERVER_STACK_SIZE
+#define VHTTP_SERVER_STACK_SIZE 32768
+#endif
+
+// Server acceptor task stack (lightweight loop).
+#ifndef VHTTP_SERVER_ACCEPTOR_STACK_SIZE
+#define VHTTP_SERVER_ACCEPTOR_STACK_SIZE 8192
+#endif
+
+// Server worker task stack (request parsing/dispatch).
+#ifndef VHTTP_SERVER_WORKER_STACK_SIZE
+#define VHTTP_SERVER_WORKER_STACK_SIZE 10240
+#endif
+
+// Server worker pool limits.
+#ifndef VHTTP_SERVER_WORKERS
+#define VHTTP_SERVER_WORKERS 12
+#endif
+
+#ifndef VHTTP_SERVER_MIN_WORKERS
+#define VHTTP_SERVER_MIN_WORKERS 4
+#endif
+
+#ifndef VHTTP_SERVER_SCALE_UP_QUEUE_THRESHOLD
+#define VHTTP_SERVER_SCALE_UP_QUEUE_THRESHOLD 2
+#endif
+
+#ifndef VHTTP_SERVER_SCALE_UP_COOLDOWN_MS
+#define VHTTP_SERVER_SCALE_UP_COOLDOWN_MS 500
+#endif
+
+#ifndef VHTTP_SERVER_SCALE_UP_FAIL_COOLDOWN_MS
+#define VHTTP_SERVER_SCALE_UP_FAIL_COOLDOWN_MS 5000
+#endif
+
+// Stage-A switch for async/event-loop runtime migration.
+// 0 keeps current worker compatibility path (default).
+// 1 enables event-loop runtime scaffolding and telemetry.
+#ifndef VHTTP_HTTP_EVENT_LOOP
+#define VHTTP_HTTP_EVENT_LOOP 1
+#endif
+
+#ifndef VHTTP_EVENT_LOOP_MAX_CONNS
+#define VHTTP_EVENT_LOOP_MAX_CONNS (VHTTP_SERVER_WORKERS * 2)
+#endif
+
+#ifndef VHTTP_EVENT_LOOP_WAIT_IPC_DRAIN_BUDGET
+#define VHTTP_EVENT_LOOP_WAIT_IPC_DRAIN_BUDGET 8
+#endif
+
+#ifndef VHTTP_PENDING_RESP_SLOTS
+#define VHTTP_PENDING_RESP_SLOTS (VHTTP_IPC_RESPONSE_QUEUE_LEN * 16)
+#endif
+
+#ifndef VHTTP_CANCELED_REQ_SLOTS
+#define VHTTP_CANCELED_REQ_SLOTS VHTTP_PENDING_RESP_SLOTS
+#endif
+
+// WebSocket connection task stack (long-lived WS loops).
+#ifndef VHTTP_SERVER_WS_STACK_SIZE
+#define VHTTP_SERVER_WS_STACK_SIZE 16384
+#endif
+
+#ifndef VHTTP_SERVER_STREAM_FAIR_CHUNK_BUDGET
+#define VHTTP_SERVER_STREAM_FAIR_CHUNK_BUDGET 1
+#endif
+
+#ifndef VHTTP_SERVER_WAIT_IPC_SLICE_MS
+#define VHTTP_SERVER_WAIT_IPC_SLICE_MS 25
+#endif
+
+#ifndef VHTTP_WS_FAIR_IPC_BUDGET
+#define VHTTP_WS_FAIR_IPC_BUDGET 8
+#endif
+
+#ifndef VHTTP_WS_FAIR_FRAME_BUDGET
+#define VHTTP_WS_FAIR_FRAME_BUDGET 8
+#endif
+
+// WebSocket defaults.
+#ifndef VHTTP_WS_MAX_FRAME_SIZE
+#define VHTTP_WS_MAX_FRAME_SIZE 4096
+#endif
+
+#ifndef VHTTP_WS_MAX_MESSAGE_SIZE
+#define VHTTP_WS_MAX_MESSAGE_SIZE 65536
+#endif
+
+#ifndef VHTTP_WS_PING_INTERVAL_MS
+#define VHTTP_WS_PING_INTERVAL_MS 30000
+#endif
+
+#ifndef VHTTP_WS_PONG_TIMEOUT_MS
+#define VHTTP_WS_PONG_TIMEOUT_MS 10000
+#endif
+
+#ifndef VHTTP_WS_HANDSHAKE_TIMEOUT_MS
+#define VHTTP_WS_HANDSHAKE_TIMEOUT_MS 2000
+#endif
+
+// Rate limiter defaults.
+#ifndef VHTTP_RL_MAX_ENTRIES
+#define VHTTP_RL_MAX_ENTRIES 64
+#endif
+
+#ifndef VHTTP_RL_DEFAULT_RATE_PER_SEC
+#define VHTTP_RL_DEFAULT_RATE_PER_SEC 20
+#endif
+
+#ifndef VHTTP_RL_DEFAULT_BURST
+#define VHTTP_RL_DEFAULT_BURST 40
+#endif
+
+// Trusted host defaults.
+#ifndef VHTTP_TRUSTED_HOST_MAX
+#define VHTTP_TRUSTED_HOST_MAX 8
+#endif
+
+#ifndef VHTTP_TRUSTED_HOST_MAX_LEN
+#define VHTTP_TRUSTED_HOST_MAX_LEN 128
+#endif
+
+// CORS defaults.
+#ifndef VHTTP_CORS_MAX_ORIGINS
+#define VHTTP_CORS_MAX_ORIGINS 8
+#endif
+
+#ifndef VHTTP_CORS_MAX_ORIGIN_LEN
+#define VHTTP_CORS_MAX_ORIGIN_LEN 128
+#endif
+
+#ifndef VHTTP_CORS_MAX_METHODS_LEN
+#define VHTTP_CORS_MAX_METHODS_LEN 128
+#endif
+
+#ifndef VHTTP_CORS_MAX_HEADERS_LEN
+#define VHTTP_CORS_MAX_HEADERS_LEN 256
+#endif
+
+#ifndef VHTTP_CORS_MAX_EXPOSE_LEN
+#define VHTTP_CORS_MAX_EXPOSE_LEN 256
+#endif
+
+#ifndef VHTTP_CORS_HEADER_MAX
+#define VHTTP_CORS_HEADER_MAX 512
+#endif
+
+#ifndef VHTTP_CORS_DEFAULT_METHODS
+#define VHTTP_CORS_DEFAULT_METHODS "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD"
+#endif
+
+#ifndef VHTTP_CORS_DEFAULT_HEADERS
+#define VHTTP_CORS_DEFAULT_HEADERS "*"
+#endif
+
+#ifndef VHTTP_CORS_DEFAULT_MAX_AGE
+#define VHTTP_CORS_DEFAULT_MAX_AGE 600
+#endif
+
+// C-native logging.
+#ifndef VHTTP_LOG_LEVEL_OFF
+#define VHTTP_LOG_LEVEL_OFF 0
+#endif
+
+#ifndef VHTTP_LOG_LEVEL_ERROR
+#define VHTTP_LOG_LEVEL_ERROR 1
+#endif
+
+#ifndef VHTTP_LOG_LEVEL_WARN
+#define VHTTP_LOG_LEVEL_WARN 2
+#endif
+
+#ifndef VHTTP_LOG_LEVEL_INFO
+#define VHTTP_LOG_LEVEL_INFO 3
+#endif
+
+#ifndef VHTTP_LOG_LEVEL_DEBUG
+#define VHTTP_LOG_LEVEL_DEBUG 4
+#endif
+
+#ifndef VHTTP_LOG_LEVEL_TRACE
+#define VHTTP_LOG_LEVEL_TRACE 5
+#endif
+
+#ifndef VHTTP_LOG_LEVEL_DEFAULT
+#define VHTTP_LOG_LEVEL_DEFAULT VHTTP_LOG_LEVEL_INFO
+#endif
+
+#endif // VHTTP_CONFIG_H

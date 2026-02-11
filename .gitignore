@@ -1,0 +1,41 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Build artifacts
+build/
+dist/
+out/
+tmp/
+temp/
+*.log
+*.tmp
+*.pid
+*.out
+*.err
+
+# ESP-IDF / MicroPython generated outputs
+vendor/micropython/ports/esp32/build-*/
+vendor/micropython/mpy-cross/build/
+tools/perf_history/
+tools/certs/
+
+# Local notes / scratch
+rozmowa.txt

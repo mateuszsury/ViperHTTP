@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title|default("ViperHTTP Control Hub")|escape }}</title>
+    <style>
+      :root {
+        --bg-0: #0b1017;
+        --bg-1: #121e2a;
+        --bg-2: #1b2c3b;
+        --fg: #eff6ff;
+        --muted: #9db0c3;
+        --accent: #5eead4;
+        --accent-2: #60a5fa;
+        --card: rgba(15, 24, 35, 0.78);
+        --line: rgba(157, 176, 195, 0.2);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: var(--fg);
+        font-family: "Sora", "Space Grotesk", "Trebuchet MS", sans-serif;
+        background:
+          radial-gradient(1200px 600px at 10% -10%, #1f3a5a 0%, transparent 60%),
+          radial-gradient(1000px 600px at 100% 0%, #1c4f59 0%, transparent 60%),
+          linear-gradient(140deg, var(--bg-0), var(--bg-1) 48%, var(--bg-2));
+        min-height: 100vh;
+      }
+      .page {
+        width: min(1280px, 96vw);
+        margin: 0 auto;
+        padding: 28px 0 56px;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 14px;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--card);
+        backdrop-filter: blur(8px);
+        padding: 18px;
+      }
+      .panel h1 {
+        margin: 0 0 8px;
+        font-size: clamp(1.3rem, 2.5vw, 2rem);
+        letter-spacing: 0.02em;
+      }
+      .panel p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(8, 14, 22, 0.45);
+      }
+      .stat .k {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .stat .v {
+        font-size: 1.05rem;
+        margin-top: 2px;
+      }
+      .toolbar {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .toolbar input {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(4, 10, 16, 0.6);
+        color: var(--fg);
+        padding: 9px 10px;
+        font: inherit;
+      }
+      .hint {
+        margin-top: 8px;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      .groups {
+        margin-top: 14px;
+        display: grid;
+        gap: 12px;
+      }
+      .group-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(10, 17, 26, 0.72);
+        padding: 14px;
+      }
+      .group-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+      .group-head h2 {
+        margin: 0;
+        font-size: 1.02rem;
+      }
+      .group-head p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 0.87rem;
+      }
+      .group-count {
+        display: inline-flex;
+        min-width: 34px;
+        height: 34px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(96, 165, 250, 0.16);
+        color: var(--accent-2);
+        font-weight: 700;
+      }
+      .tests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 10px;
+      }
+      .test-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(2, 8, 13, 0.52);
+        padding: 11px;
+      }
+      .test-card h3 {
+        margin: 0 0 6px;
+        font-size: 0.95rem;
+      }
+      .endpoint {
+        margin: 0;
+        font-size: 0.78rem;
+        color: #d9f8ff;
+        word-break: break-all;
+      }
+      .expect {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 0.79rem;
+        min-height: 28px;
+      }
+      .actions {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+      }
+      .actions a,
+      .actions button {
+        flex: 1;
+        border-radius: 9px;
+        border: 1px solid var(--line);
+        background: rgba(94, 234, 212, 0.14);
+        color: var(--fg);
+        padding: 8px 9px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.8rem;
+      }
+      .actions button {
+        background: rgba(96, 165, 250, 0.17);
+      }
+      .log {
+        margin-top: 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .log-head {
+        padding: 10px 12px;
+        background: rgba(2, 8, 13, 0.78);
+        border-bottom: 1px solid var(--line);
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .log pre {
+        margin: 0;
+        padding: 12px;
+        min-height: 170px;
+        max-height: 360px;
+        overflow: auto;
+        background: #08121d;
+        color: #d9f8ff;
+        font-family: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+        font-size: 0.8rem;
+      }
+      @media (max-width: 980px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+        .toolbar {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 680px) {
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% set stats = template_stats %}
+    <main class="page">
+      <section class="hero">
+        <div class="panel">
+          <h1>{{ title|escape }}</h1>
+          <p>{{ subtitle|default("Diagnostics and test matrix")|escape }}</p>
+          <div class="hint">version={{ version|escape }} | groups={{ group_count }} | endpoints={{ endpoint_count }}</div>
+          <div class="toolbar">
+            <input id="auth-bearer" value="testtoken" placeholder="Bearer token" />
+            <input id="auth-apikey" value="testkey" placeholder="API key" />
+            <input id="auth-basic" value="admin:secret" placeholder="Basic user:pass" />
+            <input id="auth-session" value="" placeholder="Session cookie value" />
+            <input id="auth-csrf" value="" placeholder="CSRF token" />
+          </div>
+          <div class="hint">Tip: use Session Login first, then paste cookie/token to run protected endpoints.</div>
+        </div>
+        <div class="panel">
+          <div class="stats">
+            <div class="stat"><div class="k">Template Renders</div><div class="v">{{ stats.renders|default(0) }}</div></div>
+            <div class="stat"><div class="k">Template Compiles</div><div class="v">{{ stats.compiles|default(0) }}</div></div>
+            <div class="stat"><div class="k">Cache Hits</div><div class="v">{{ stats.cache_hits|default(0) }}</div></div>
+            <div class="stat"><div class="k">Cache Misses</div><div class="v">{{ stats.cache_misses|default(0) }}</div></div>
+            <div class="stat"><div class="k">Cache Evictions</div><div class="v">{{ stats.cache_evicts|default(0) }}</div></div>
+            <div class="stat"><div class="k">Template Errors</div><div class="v">{{ stats.errors|default(0) }}</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="groups">
+        {% for group in groups %}
+        {% include "ui_group.html" %}
+        {% endfor %}
+      </section>
+
+      <section class="log">
+        <div class="log-head">Execution log</div>
+        <pre id="run-log">Ready.</pre>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        const log = document.getElementById("run-log");
+        const bearerEl = document.getElementById("auth-bearer");
+        const apiKeyEl = document.getElementById("auth-apikey");
+        const basicEl = document.getElementById("auth-basic");
+        const sessionEl = document.getElementById("auth-session");
+        const csrfEl = document.getElementById("auth-csrf");
+
+        function logLine(text) {
+          const line = "[" + new Date().toLocaleTimeString() + "] " + text;
+          log.textContent += "\n" + line;
+          log.scrollTop = log.scrollHeight;
+        }
+
+        function withAuth(url, headers) {
+          const out = Object.assign({}, headers || {});
+          const bearer = (bearerEl.value || "").trim();
+          const apiKey = (apiKeyEl.value || "").trim();
+          const basic = (basicEl.value || "").trim();
+          const session = (sessionEl.value || "").trim();
+          const csrf = (csrfEl.value || "").trim();
+          if (url.indexOf("/auth/bearer") === 0 && bearer) {
+            out.Authorization = "Bearer " + bearer;
+          }
+          if (url.indexOf("/auth/admin") === 0 && bearer) {
+            out.Authorization = "Bearer " + bearer;
+          }
+          if (url.indexOf("/auth/apikey") === 0 && apiKey) {
+            out["X-API-Key"] = apiKey;
+          }
+          if (url.indexOf("/auth/basic") === 0 && basic) {
+            out.Authorization = "Basic " + btoa(basic);
+          }
+          if (url.indexOf("/session/") === 0 && session) {
+            out.Cookie = "vhttp_session=" + session;
+          }
+          if ((url.indexOf("/session/protected") === 0 || url.indexOf("/session/logout") === 0) && csrf) {
+            out["X-CSRF-Token"] = csrf;
+          }
+          return out;
+        }
+
+        async function runHttp(test) {
+          let headers = {};
+          try {
+            headers = JSON.parse(test.headers || "{}");
+          } catch (err) {
+            headers = {};
+          }
+          headers = withAuth(test.url, headers);
+          const opts = { method: test.method, headers: headers };
+          if (test.method !== "GET" && test.method !== "HEAD" && test.body) {
+            opts.body = test.body;
+          }
+          const started = Date.now();
+          const resp = await fetch(test.url, opts);
+          const elapsed = Date.now() - started;
+          const txt = await resp.text();
+          logLine(test.name + " -> " + resp.status + " (" + elapsed + " ms)");
+          logLine("response: " + txt.slice(0, 600));
+
+          if (test.url.indexOf("/session/login") === 0) {
+            const setCookie = resp.headers.get("set-cookie");
+            if (setCookie && setCookie.indexOf("vhttp_session=") >= 0) {
+              const sessionPart = setCookie.split(";")[0];
+              const value = sessionPart.split("=")[1] || "";
+              sessionEl.value = value;
+              logLine("session cookie captured");
+            }
+          }
+          if (test.url.indexOf("/session/csrf") === 0) {
+            try {
+              const obj = JSON.parse(txt);
+              if (obj && obj.token) {
+                csrfEl.value = obj.token;
+                logLine("csrf token captured");
+              }
+            } catch (err) {
+            }
+          }
+        }
+
+        async function runWs(test) {
+          const proto = location.protocol === "https:" ? "wss://" : "ws://";
+          const ws = new WebSocket(proto + location.host + test.url);
+          const lines = [];
+          logLine(test.name + " -> connecting " + test.url);
+          await new Promise((resolve, reject) => {
+            const t = setTimeout(() => reject(new Error("WS timeout")), 5000);
+            ws.onopen = function () {
+              if (test.url === "/ws/echo") {
+                ws.send(test.wsMessage || "hi");
+              } else if (test.url === "/ws/room") {
+                ws.send(test.wsMessage || "join:alpha");
+                setTimeout(function () { ws.send("say:hello"); }, 80);
+                setTimeout(function () { ws.send("stats"); }, 120);
+              }
+            };
+            ws.onmessage = function (ev) {
+              lines.push(ev.data);
+              if (test.url === "/ws/echo" && lines.length >= 1) {
+                clearTimeout(t);
+                resolve();
+              }
+              if (test.url === "/ws/room" && lines.length >= 3) {
+                clearTimeout(t);
+                resolve();
+              }
+            };
+            ws.onerror = function () {
+              clearTimeout(t);
+              reject(new Error("WS error"));
+            };
+          });
+          try { ws.close(); } catch (err) {}
+          logLine(test.name + " -> WS OK");
+          for (let i = 0; i < lines.length; i++) {
+            logLine("ws[" + i + "]: " + lines[i]);
+          }
+        }
+
+        function parseDataset(btn) {
+          return {
+            name: btn.getAttribute("data-name") || "test",
+            method: (btn.getAttribute("data-method") || "GET").toUpperCase(),
+            url: btn.getAttribute("data-url") || "/",
+            body: btn.getAttribute("data-body") || "",
+            headers: btn.getAttribute("data-headers") || "{}",
+            wsMessage: btn.getAttribute("data-ws-message") || "",
+          };
+        }
+
+        const buttons = document.querySelectorAll(".run-btn");
+        for (let i = 0; i < buttons.length; i++) {
+          buttons[i].addEventListener("click", async function () {
+            const test = parseDataset(this);
+            try {
+              if (test.method === "WS") {
+                await runWs(test);
+              } else {
+                await runHttp(test);
+              }
+            } catch (err) {
+              logLine(test.name + " -> ERROR: " + (err && err.message ? err.message : String(err)));
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

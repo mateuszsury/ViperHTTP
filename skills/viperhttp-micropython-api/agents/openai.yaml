@@ -1,0 +1,4 @@
+interface:
+  display_name: "ViperHTTP MicroPython API"
+  short_description: "MicroPython API, Depends, middleware, responses"
+  default_prompt: "Use $viperhttp-micropython-api to implement FastAPI-like decorators, Depends, and response types."
