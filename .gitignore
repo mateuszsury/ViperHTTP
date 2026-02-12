@@ -23,6 +23,7 @@ env/
 build/
 dist/
 out/
+site/
 tmp/
 temp/
 *.log

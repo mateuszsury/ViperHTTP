@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420">
+  <defs>
+    <linearGradient id="archBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D1117"/>
+      <stop offset="100%" stop-color="#161B22"/>
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1F6FEB" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#1F6FEB" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="pyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00C853" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#00C853" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="ipcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFD600" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FF9100" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="420" rx="8" fill="url(#archBg)"/>
+  <rect width="800" height="420" rx="8" fill="none" stroke="#30363D" stroke-width="1"/>
+
+  <!-- Title -->
+  <text x="400" y="36" font-family="'Segoe UI', system-ui, sans-serif" font-size="18" font-weight="600"
+        fill="#E6EDF3" text-anchor="middle">Dual-Core Architecture</text>
+
+  <!-- Core 0 container -->
+  <rect x="30" y="56" width="350" height="310" rx="8" fill="url(#coreGrad)" stroke="#1F6FEB" stroke-width="1.5" stroke-opacity="0.5"/>
+  <text x="205" y="80" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="600"
+        fill="#58A6FF" text-anchor="middle">Core 0 — C Runtime</text>
+  <text x="205" y="96" font-family="'Segoe UI', system-ui, sans-serif" font-size="11"
+        fill="#8B949E" text-anchor="middle">FreeRTOS Task / Native Speed</text>
+
+  <!-- C Runtime blocks -->
+  <!-- Parser -->
+  <rect x="52" y="112" width="140" height="50" rx="6" fill="#0D1117" stroke="#1F6FEB" stroke-width="1"/>
+  <text x="122" y="134" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#58A6FF" text-anchor="middle">HTTP Parser</text>
+  <text x="122" y="150" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">Zero-copy, HTTP/1.1+2</text>
+
+  <!-- Router -->
+  <rect x="210" y="112" width="140" height="50" rx="6" fill="#0D1117" stroke="#1F6FEB" stroke-width="1"/>
+  <text x="280" y="134" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#58A6FF" text-anchor="middle">Router</text>
+  <text x="280" y="150" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">Typed params, groups</text>
+
+  <!-- Static -->
+  <rect x="52" y="176" width="140" height="50" rx="6" fill="#0D1117" stroke="#1F6FEB" stroke-width="1"/>
+  <text x="122" y="198" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#58A6FF" text-anchor="middle">Static Server</text>
+  <text x="122" y="214" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">ETag, gzip, range</text>
+
+  <!-- TLS -->
+  <rect x="210" y="176" width="140" height="50" rx="6" fill="#0D1117" stroke="#1F6FEB" stroke-width="1"/>
+  <text x="280" y="198" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#58A6FF" text-anchor="middle">TLS + HPACK</text>
+  <text x="280" y="214" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">HTTPS, HTTP/2 streams</text>
+
+  <!-- Security C -->
+  <rect x="52" y="240" width="140" height="50" rx="6" fill="#0D1117" stroke="#1F6FEB" stroke-width="1"/>
+  <text x="122" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#58A6FF" text-anchor="middle">CORS + Rate Limit</text>
+  <text x="122" y="278" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">C-native enforcement</text>
+
+  <!-- Template -->
+  <rect x="210" y="240" width="140" height="50" rx="6" fill="#0D1117" stroke="#1F6FEB" stroke-width="1"/>
+  <text x="280" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#58A6FF" text-anchor="middle">Template Engine</text>
+  <text x="280" y="278" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">Caching, loops, includes</text>
+
+  <!-- Connection arrows within Core 0 -->
+  <path d="M192 137 L210 137" stroke="#1F6FEB" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arrowBlue)"/>
+  <path d="M122 162 L122 176" stroke="#1F6FEB" stroke-width="1" stroke-opacity="0.5"/>
+  <path d="M280 162 L280 176" stroke="#1F6FEB" stroke-width="1" stroke-opacity="0.5"/>
+
+  <!-- Core 1 container -->
+  <rect x="420" y="56" width="350" height="310" rx="8" fill="url(#pyGrad)" stroke="#00C853" stroke-width="1.5" stroke-opacity="0.5"/>
+  <text x="595" y="80" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="600"
+        fill="#00E676" text-anchor="middle">Core 1 — MicroPython</text>
+  <text x="595" y="96" font-family="'Segoe UI', system-ui, sans-serif" font-size="11"
+        fill="#8B949E" text-anchor="middle">uasyncio Event Loop / Developer API</text>
+
+  <!-- Python blocks -->
+  <!-- Bridge -->
+  <rect x="442" y="112" width="140" height="50" rx="6" fill="#0D1117" stroke="#00C853" stroke-width="1"/>
+  <text x="512" y="134" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#00E676" text-anchor="middle">IPC Bridge</text>
+  <text x="512" y="150" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">Request dispatch</text>
+
+  <!-- Handlers -->
+  <rect x="600" y="112" width="140" height="50" rx="6" fill="#0D1117" stroke="#00C853" stroke-width="1"/>
+  <text x="670" y="134" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#00E676" text-anchor="middle">Route Handlers</text>
+  <text x="670" y="150" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">@app.get, Depends()</text>
+
+  <!-- Middleware -->
+  <rect x="442" y="176" width="140" height="50" rx="6" fill="#0D1117" stroke="#00C853" stroke-width="1"/>
+  <text x="512" y="198" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#00E676" text-anchor="middle">Middleware</text>
+  <text x="512" y="214" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">CORS, auth, sessions</text>
+
+  <!-- Responses -->
+  <rect x="600" y="176" width="140" height="50" rx="6" fill="#0D1117" stroke="#00C853" stroke-width="1"/>
+  <text x="670" y="198" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#00E676" text-anchor="middle">Responses</text>
+  <text x="670" y="214" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">JSON, SSE, Stream, WS</text>
+
+  <!-- Auth -->
+  <rect x="442" y="240" width="140" height="50" rx="6" fill="#0D1117" stroke="#00C853" stroke-width="1"/>
+  <text x="512" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#00E676" text-anchor="middle">Auth + Sessions</text>
+  <text x="512" y="278" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">Bearer, Basic, CSRF</text>
+
+  <!-- OTA -->
+  <rect x="600" y="240" width="140" height="50" rx="6" fill="#0D1117" stroke="#00C853" stroke-width="1"/>
+  <text x="670" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#00E676" text-anchor="middle">OTA + AutoDocs</text>
+  <text x="670" y="278" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#8B949E" text-anchor="middle">Firmware, OpenAPI 3.0</text>
+
+  <!-- IPC Queue - center connector -->
+  <rect x="365" y="140" width="70" height="140" rx="6" fill="url(#ipcGrad)" stroke="#FFD600" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="400" y="195" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600"
+        fill="#FFD600" text-anchor="middle" transform="rotate(-90, 400, 210)">IPC Queue</text>
+
+  <!-- IPC arrows -->
+  <line x1="350" y1="180" x2="365" y2="180" stroke="#FFD600" stroke-width="1.5" stroke-opacity="0.7"/>
+  <line x1="350" y1="230" x2="365" y2="230" stroke="#FFD600" stroke-width="1.5" stroke-opacity="0.7"/>
+  <line x1="435" y1="180" x2="442" y2="180" stroke="#FFD600" stroke-width="1.5" stroke-opacity="0.7"/>
+  <line x1="435" y1="230" x2="442" y2="230" stroke="#FFD600" stroke-width="1.5" stroke-opacity="0.7"/>
+
+  <!-- Network input arrow -->
+  <text x="205" y="345" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="500"
+        fill="#8B949E" text-anchor="middle">TCP/TLS Socket</text>
+  <line x1="205" y1="330" x2="205" y2="310" stroke="#8B949E" stroke-width="1" stroke-dasharray="4"/>
+
+  <!-- App output arrow -->
+  <text x="595" y="345" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="500"
+        fill="#8B949E" text-anchor="middle">Developer Python Code</text>
+  <line x1="595" y1="330" x2="595" y2="310" stroke="#8B949E" stroke-width="1" stroke-dasharray="4"/>
+
+  <!-- Legend -->
+  <rect x="30" y="380" width="12" height="12" rx="2" fill="#1F6FEB" fill-opacity="0.3" stroke="#1F6FEB" stroke-width="1"/>
+  <text x="48" y="391" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#8B949E">Native C (performance-critical)</text>
+  <rect x="250" y="380" width="12" height="12" rx="2" fill="#00C853" fill-opacity="0.3" stroke="#00C853" stroke-width="1"/>
+  <text x="268" y="391" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#8B949E">MicroPython (developer-facing)</text>
+  <rect x="490" y="380" width="12" height="12" rx="2" fill="#FFD600" fill-opacity="0.3" stroke="#FFD600" stroke-width="1"/>
+  <text x="508" y="391" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#8B949E">Inter-Process Communication</text>
+</svg>
