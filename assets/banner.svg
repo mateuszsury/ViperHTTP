@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <linearGradient id="bannerBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1628"/>
+      <stop offset="50%" style="stop-color:#0d2137"/>
+      <stop offset="100%" style="stop-color:#0a1628"/>
+    </linearGradient>
+    <linearGradient id="bnSnakeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00C853"/>
+      <stop offset="100%" style="stop-color:#00E676"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00C853"/>
+      <stop offset="100%" style="stop-color:#00E676"/>
+    </linearGradient>
+    <linearGradient id="bnBoltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD600"/>
+      <stop offset="100%" style="stop-color:#FF9100"/>
+    </linearGradient>
+    <linearGradient id="bnLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00C853;stop-opacity:0.5"/>
+      <stop offset="100%" style="stop-color:#00E676;stop-opacity:0.5"/>
+    </linearGradient>
+    <filter id="bnGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="200" rx="12" fill="url(#bannerBg)"/>
+
+  <!-- Decorative network lines (left) -->
+  <g filter="url(#bnGlow)" fill="none" stroke="url(#bnLineGrad)" stroke-linecap="round" opacity="0.35">
+    <path d="M25 35 Q45 55 70 50" stroke-width="1.2"/>
+    <path d="M70 50 Q100 48 125 65" stroke-width="1.2"/>
+    <path d="M25 35 Q35 65 50 85" stroke-width="1"/>
+    <path d="M50 85 Q65 105 70 125" stroke-width="1"/>
+    <path d="M70 50 Q65 75 50 85" stroke-width="1"/>
+    <path d="M125 65 Q135 90 125 115" stroke-width="1"/>
+    <path d="M70 125 Q95 135 125 115" stroke-width="1"/>
+    <path d="M25 155 Q45 135 70 125" stroke-width="1"/>
+    <path d="M125 115 Q145 125 165 115" stroke-width="0.8"/>
+  </g>
+  <g filter="url(#bnGlow)">
+    <circle cx="25" cy="35" r="2.5" fill="url(#bnSnakeGrad)" opacity="0.5"/>
+    <circle cx="70" cy="50" r="2.5" fill="url(#bnSnakeGrad)" opacity="0.5"/>
+    <circle cx="125" cy="65" r="2.5" fill="url(#bnSnakeGrad)" opacity="0.5"/>
+    <circle cx="50" cy="85" r="2.5" fill="url(#bnSnakeGrad)" opacity="0.5"/>
+    <circle cx="70" cy="125" r="2.5" fill="url(#bnSnakeGrad)" opacity="0.5"/>
+    <circle cx="125" cy="115" r="2.5" fill="url(#bnSnakeGrad)" opacity="0.5"/>
+    <circle cx="25" cy="155" r="2.5" fill="url(#bnSnakeGrad)" opacity="0.5"/>
+    <circle cx="165" cy="115" r="1.5" fill="url(#bnSnakeGrad)" opacity="0.3"/>
+  </g>
+
+  <!-- Decorative network lines (right) -->
+  <g filter="url(#bnGlow)" fill="none" stroke="url(#bnLineGrad)" stroke-linecap="round" opacity="0.25">
+    <path d="M650 30 Q670 50 700 45" stroke-width="1"/>
+    <path d="M700 45 Q730 50 750 35" stroke-width="1"/>
+    <path d="M700 45 Q710 75 730 90" stroke-width="1"/>
+    <path d="M730 90 Q750 100 770 95" stroke-width="0.8"/>
+    <path d="M650 165 Q680 150 710 160" stroke-width="1"/>
+    <path d="M710 160 Q740 155 760 170" stroke-width="1"/>
+    <path d="M730 90 Q720 120 710 160" stroke-width="0.8"/>
+  </g>
+  <g filter="url(#bnGlow)">
+    <circle cx="650" cy="30" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+    <circle cx="700" cy="45" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+    <circle cx="750" cy="35" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+    <circle cx="730" cy="90" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+    <circle cx="770" cy="95" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+    <circle cx="650" cy="165" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+    <circle cx="710" cy="160" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+    <circle cx="760" cy="170" r="2" fill="url(#bnSnakeGrad)" opacity="0.35"/>
+  </g>
+
+  <!-- Logo (mini viper + bolt) -->
+  <g transform="translate(210, 22)">
+    <!-- Logo circle -->
+    <circle cx="78" cy="78" r="72" fill="none" stroke="url(#bnSnakeGrad)" stroke-width="1.5" opacity="0.3"/>
+
+    <!-- Viper body (mini) -->
+    <g filter="url(#bnGlow)">
+      <path d="M55 35 C40 45, 36 60, 50 70 C64 80, 68 88, 58 97 C48 106, 44 118, 55 125 C62 130, 70 128, 74 123"
+            fill="none" stroke="url(#bnSnakeGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Head -->
+      <path d="M51 32 L55 35 L49 37 Z" fill="url(#bnSnakeGrad)"/>
+      <circle cx="48" cy="31" r="1.8" fill="#fff" opacity="0.9"/>
+      <!-- Tongue -->
+      <path d="M45 34 L40 31 M45 34 L40 37" fill="none" stroke="#FF5252" stroke-width="1" stroke-linecap="round"/>
+    </g>
+
+    <!-- Lightning bolt (mini) -->
+    <g filter="url(#bnGlow)">
+      <polygon points="95,25 82,70 92,70 76,125 108,62 96,62 110,25"
+               fill="url(#bnBoltGrad)" opacity="0.85"/>
+    </g>
+  </g>
+
+  <!-- Text -->
+  <text x="390" y="82" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="52" font-weight="700" fill="url(#textGrad)" letter-spacing="-1">ViperHTTP</text>
+  <text x="392" y="118" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#7a8fa6" letter-spacing="0.5">Blazing-fast HTTP Server for MicroPython</text>
+
+  <!-- Tech badges -->
+  <g transform="translate(392, 135)">
+    <rect width="48" height="20" rx="10" fill="url(#bnSnakeGrad)" opacity="0.12"/>
+    <rect width="48" height="20" rx="10" fill="none" stroke="url(#bnSnakeGrad)" stroke-width="0.8" opacity="0.35"/>
+    <text x="24" y="14" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#00E676" text-anchor="middle" opacity="0.9">ESP32</text>
+  </g>
+  <g transform="translate(448, 135)">
+    <rect width="60" height="20" rx="10" fill="url(#bnBoltGrad)" opacity="0.12"/>
+    <rect width="60" height="20" rx="10" fill="none" stroke="url(#bnBoltGrad)" stroke-width="0.8" opacity="0.35"/>
+    <text x="30" y="14" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#FFD600" text-anchor="middle" opacity="0.9">C + Py</text>
+  </g>
+  <g transform="translate(516, 135)">
+    <rect width="50" height="20" rx="10" fill="url(#bnSnakeGrad)" opacity="0.12"/>
+    <rect width="50" height="20" rx="10" fill="none" stroke="url(#bnSnakeGrad)" stroke-width="0.8" opacity="0.35"/>
+    <text x="25" y="14" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#00E676" text-anchor="middle" opacity="0.9">HTTP/2</text>
+  </g>
+  <g transform="translate(574, 135)">
+    <rect width="42" height="20" rx="10" fill="url(#bnSnakeGrad)" opacity="0.12"/>
+    <rect width="42" height="20" rx="10" fill="none" stroke="url(#bnSnakeGrad)" stroke-width="0.8" opacity="0.35"/>
+    <text x="21" y="14" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#00E676" text-anchor="middle" opacity="0.9">Async</text>
+  </g>
+</svg>

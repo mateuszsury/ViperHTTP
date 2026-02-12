@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="h2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C853"/>
+      <stop offset="100%" stop-color="#00E676"/>
+    </linearGradient>
+  </defs>
+  <!-- Badge background -->
+  <rect x="4" y="10" width="40" height="28" rx="6" fill="none" stroke="url(#h2Grad)" stroke-width="2"/>
+  <!-- H2 text -->
+  <text x="24" y="31" font-family="'Segoe UI', system-ui, sans-serif" font-size="18" font-weight="700"
+        fill="url(#h2Grad)" text-anchor="middle" letter-spacing="-0.5">H/2</text>
+</svg>
