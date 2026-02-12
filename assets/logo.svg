@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1628"/>
+      <stop offset="50%" style="stop-color:#0d2137"/>
+      <stop offset="100%" style="stop-color:#0a1628"/>
+    </linearGradient>
+    <linearGradient id="snakeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00C853"/>
+      <stop offset="100%" style="stop-color:#00E676"/>
+    </linearGradient>
+    <linearGradient id="snakeGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#00C853;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#00E676;stop-opacity:0.6"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD600"/>
+      <stop offset="100%" style="stop-color:#FF9100"/>
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00C853;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#00C853;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="boltGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD600;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#FFD600;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="boltFilter">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" stroke="url(#snakeGrad)" stroke-width="2" opacity="0.95"/>
+
+  <!-- Ambient glow -->
+  <circle cx="256" cy="256" r="200" fill="url(#glowGrad)"/>
+  <circle cx="300" cy="230" r="120" fill="url(#boltGlow)"/>
+
+  <!-- Decorative circuit/network lines -->
+  <g fill="none" stroke="url(#snakeGrad2)" stroke-linecap="round" opacity="0.2">
+    <path d="M120 140 Q160 160 180 200" stroke-width="1"/>
+    <path d="M180 200 Q190 230 180 260" stroke-width="1"/>
+    <path d="M380 140 Q360 170 370 200" stroke-width="1"/>
+    <path d="M370 200 Q380 240 370 280" stroke-width="1"/>
+    <path d="M140 350 Q170 340 200 360" stroke-width="1"/>
+    <path d="M340 380 Q360 370 390 360" stroke-width="1"/>
+    <circle cx="120" cy="140" r="2" fill="url(#snakeGrad)" opacity="0.3"/>
+    <circle cx="380" cy="140" r="2" fill="url(#snakeGrad)" opacity="0.3"/>
+    <circle cx="140" cy="350" r="2" fill="url(#snakeGrad)" opacity="0.3"/>
+    <circle cx="390" cy="360" r="2" fill="url(#snakeGrad)" opacity="0.3"/>
+  </g>
+
+  <!-- Viper body - stylized S-curve -->
+  <g filter="url(#glow)">
+    <!-- Main body -->
+    <path d="M195 130 C155 155, 145 195, 185 225 C225 255, 235 280, 205 310 C175 340, 165 375, 195 400 C215 415, 240 410, 255 395"
+          fill="none" stroke="url(#snakeGrad)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Scale pattern overlay -->
+    <path d="M195 130 C155 155, 145 195, 185 225 C225 255, 235 280, 205 310 C175 340, 165 375, 195 400 C215 415, 240 410, 255 395"
+          fill="none" stroke="url(#snakeGrad)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>
+  </g>
+
+  <!-- Viper head -->
+  <g filter="url(#glow)">
+    <path d="M180 120 L195 130 L175 138 Z" fill="url(#snakeGrad)"/>
+    <!-- Eye -->
+    <circle cx="175" cy="118" r="5" fill="#fff" opacity="0.95"/>
+    <circle cx="175" cy="118" r="2.5" fill="#0a1628"/>
+    <!-- Tongue -->
+    <path d="M168 126 L152 118 M168 126 L152 134" fill="none" stroke="#FF5252" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Lightning bolt -->
+  <g filter="url(#boltFilter)">
+    <polygon points="330,95 290,240 320,240 270,415 370,210 335,210 375,95"
+             fill="url(#boltGrad)" opacity="0.9"/>
+    <!-- Bolt highlight -->
+    <polygon points="330,95 290,240 320,240 270,415 370,210 335,210 375,95"
+             fill="none" stroke="#FFD600" stroke-width="1.5" opacity="0.3"/>
+  </g>
+
+  <!-- Energy particles -->
+  <g opacity="0.6">
+    <circle cx="350" cy="150" r="2" fill="#FFD600"/>
+    <circle cx="380" cy="180" r="1.5" fill="#FFD600" opacity="0.5"/>
+    <circle cx="280" cy="380" r="2" fill="#FFD600"/>
+    <circle cx="310" cy="400" r="1.5" fill="#FFD600" opacity="0.5"/>
+    <circle cx="160" cy="190" r="1.5" fill="#00E676" opacity="0.5"/>
+    <circle cx="230" cy="160" r="1.5" fill="#00E676" opacity="0.5"/>
+    <circle cx="170" cy="370" r="1.5" fill="#00E676" opacity="0.5"/>
+  </g>
+</svg>

@@ -1,23 +1,81 @@
 site_name: ViperHTTP
-site_description: High-performance HTTP server stack for MicroPython on ESP32
+site_description: Blazing-fast async HTTP server for MicroPython on ESP32
+site_url: https://mateuszsury.github.io/ViperHTTP/
 repo_url: https://github.com/mateuszsury/ViperHTTP
 repo_name: mateuszsury/ViperHTTP
+
 theme:
   name: material
+  logo: logo.svg
+  favicon: logo.svg
+  palette:
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/mateuszsury/ViperHTTP
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
 
 docs_dir: docs
-exclude_docs: README.md
+exclude_docs: |
+  README.md
+  !examples/README.md
 
 nav:
   - Home: index.md
-  - API Reference: api_reference.md
-  - Bridge: bridge.md
-  - Build and Flash: build.md
-  - Performance: performance.md
-  - Parser Contract: parser_contract.md
-  - Templates:
-      - Engine Design: template_engine_design.md
-      - Best Practices: template_best_practices.md
-      - Migration: template_migration.md
-  - Operations: ops-com14-checklist.md
+  - Getting Started: getting-started.md
+  - Features: features.md
+  - Guides:
+      - Routing & Parameters: api_reference.md
+      - Middleware: middleware.md
+      - Authentication: authentication.md
+      - WebSocket: websocket.md
+      - Responses & Streaming: responses.md
+      - Security: security.md
+      - OTA Updates: ota.md
+      - Templates:
+          - Engine Design: template_engine_design.md
+          - Best Practices: template_best_practices.md
+          - Migration: template_migration.md
+  - Architecture:
+      - Bridge & IPC: bridge.md
+      - Parser Contract: parser_contract.md
+      - Performance: performance.md
+  - Build & Operations:
+      - Build and Flash: build.md
+      - Operations: ops-com14-checklist.md
   - Examples: examples/README.md

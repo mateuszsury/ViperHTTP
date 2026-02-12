@@ -22,8 +22,10 @@ Provide:
 - Impact assessment (confidentiality/integrity/availability).
 - Suggested mitigation if available.
 
-If you need an immediate contact, open a private security advisory on GitHub
-for this repository.
+### Contact
+
+- **GitHub Security Advisory**: Open a [private security advisory](https://github.com/mateuszsury/ViperHTTP/security/advisories/new) on this repository (preferred).
+- **Email**: security@viperhttp.dev
 
 ## Response Expectations
 
