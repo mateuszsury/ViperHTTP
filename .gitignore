@@ -40,3 +40,7 @@ tools/certs/
 
 # Local notes / scratch
 rozmowa.txt
+
+# Generated development files
+*.py[cod]
+*.egg-info/

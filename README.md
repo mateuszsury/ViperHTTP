@@ -271,3 +271,12 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 - [MicroPython](https://micropython.org/) — Python runtime for microcontrollers
 - [ESP-IDF](https://github.com/espressif/esp-idf) — Espressif IoT Development Framework
 - [FreeRTOS](https://www.freertos.org/) — Real-time OS for ESP32 dual-core architecture
+
+## Validation scope
+
+Repository CI exercises the host C parser, router, connection pool, pipeline and
+IPC ring, plus Python syntax and documentation builds. It does not execute the
+complete HTTP/TLS/OTA feature set on every ESP32 board. Performance depends on
+board, firmware configuration and request workload; a universal speedup over
+other servers is not established by the host tests. Record the source revision,
+board, toolchain, payloads and timing method when sharing benchmark results.
