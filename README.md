@@ -1,3 +1,5 @@
+# ViperHTTP — HTTP server for MicroPython on ESP32
+
 <p align="center">
   <img src="assets/banner.svg" alt="ViperHTTP" width="800">
 </p>
@@ -17,6 +19,14 @@
 </p>
 
 ---
+
+## Project overview
+
+An asynchronous HTTP server with a C core and a FastAPI-like MicroPython interface for ESP32.
+
+![ViperHTTP — Server architecture. Host tests, firmware tests and hardware performance measurements have separate scopes.](docs/assets/presentation/overview.svg)
+
+Server architecture. Host tests, firmware tests and hardware performance measurements have separate scopes.
 
 ## Why ViperHTTP?
 
